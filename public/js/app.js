@@ -49,39 +49,45 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Advanced Toast Notifications (Top-Center)
+// Advanced Theme-Based Toasts (Top-Right)
 function showToast(message, type = 'info') {
     const toast = document.getElementById('toast');
-    if (toast) {
-        toast.textContent = message;
+    const msg = document.getElementById('toastMsg');
+    const icon = document.getElementById('toastIcon');
+    
+    if (toast && msg && icon) {
+        msg.textContent = message;
         toast.className = 'toast toast-top show ' + type;
         
-        // Success/Error specific icons could be added here
+        // Dynamic Icons based on Theme
+        if (type === 'success') icon.innerHTML = '<i class="fas fa-check"></i>';
+        else if (type === 'error') icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+        else icon.innerHTML = '<i class="fas fa-info-circle"></i>';
         
         setTimeout(() => {
             toast.classList.remove('show');
-        }, 3500);
+        }, 4000);
     }
 }
 
 // Handle success/error from URL params automatically
-// Page Loader Controls
+// Page Loader Controls (Skeleton Shroud Sync)
 function showLoader() {
     document.body.classList.add('loading');
     const bar = document.getElementById('topProgressBar');
-    const brand = document.getElementById('brandLoader');
+    const skeleton = document.getElementById('skeletonShroud');
     if (bar) bar.classList.add('loading');
-    if (brand) brand.classList.add('show');
+    if (skeleton) skeleton.classList.add('show');
 }
 
 function hideLoader() {
     document.body.classList.remove('loading');
     const bar = document.getElementById('topProgressBar');
-    const brand = document.getElementById('brandLoader');
+    const skeleton = document.getElementById('skeletonShroud');
     if (bar) bar.classList.remove('loading');
-    if (brand) {
-        // Slight delay for brand loader to feel natural
-        setTimeout(() => brand.classList.remove('show'), 300);
+    if (skeleton) {
+        // Smooth fade out
+        setTimeout(() => skeleton.classList.remove('show'), 400);
     }
 }
 

@@ -169,9 +169,17 @@ router.post('/receive/:id', isLoggedIn, hasRole(['shop_owner']), async (req, res
     // Notify owner
     notifyReceipt(owner.email, shop.name, lot.id);
     
-    res.redirect('/');
+    // If request is from fetch (scanner), return JSON; otherwise redirect
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+       return res.json({ success: true, redirectUrl: `/lots/view/${id}` });
+    }
+    
+    res.redirect(`/lots/view/${id}`);
   } catch (err) {
     console.error(err);
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+        return res.status(500).json({ error: 'Update Failed' });
+    }
     res.status(500).send('Update Failed');
   }
 });

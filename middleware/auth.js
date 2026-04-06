@@ -1,7 +1,8 @@
 module.exports = {
   isLoggedIn: (req, res, next) => {
     if (req.session.user) return next();
-    res.redirect('/auth/login');
+    // Redirect with message for better user experience
+    res.redirect('/auth/login?error=Session%20Expired');
   },
   
   hasRole: (roles) => {
@@ -9,7 +10,10 @@ module.exports = {
       if (req.session.user && roles.includes(req.session.user.role)) {
         return next();
       }
-      res.status(403).send('Unauthorized');
+      res.status(403).render('404', { 
+        user: req.session.user || null,
+        pageTitle: 'Forbidden' 
+      });
     };
   }
 };

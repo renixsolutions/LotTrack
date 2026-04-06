@@ -4,6 +4,24 @@ const { isLoggedIn, hasRole } = require('../middleware/auth');
 const db = require('../db');
 const { notifyNewOrder } = require('../services/email');
 
+// View My Orders (Shop Owner)
+router.get('/', isLoggedIn, hasRole(['shop_owner']), async (req, res) => {
+  try {
+    const orders = await db('orders')
+      .where('shop_id', req.session.user.id)
+      .orderBy('created_at', 'desc');
+    res.render('order_list', { 
+        orders,
+        user: req.session.user,
+        activePage: 'orders',
+        pageTitle: 'My Order Requests'
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
+  }
+});
+
 // New Order Form (Shop Owner)
 router.get('/new', isLoggedIn, hasRole(['shop_owner']), async (req, res) => {
   res.render('new_order');

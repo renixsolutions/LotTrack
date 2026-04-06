@@ -1,0 +1,90 @@
+<%- include('partials/header', { activePage: 'orders' }) %>
+
+<div class="layout">
+  <%- include('partials/sidebar') %>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">Order Requests</div>
+      </div>
+      <div class="topbar-right">
+        <a href="/orders/new" class="btn btn-primary btn-sm">
+          <i class="fas fa-plus"></i> New Order
+        </a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Order History</div>
+          <div style="font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase;">
+             Assigned to Warehouse
+          </div>
+        </div>
+        <div class="card-body" style="padding: 0;">
+          <% if (orders && orders.length > 0) { %>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Mobile</th>
+                    <th>Address</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% orders.forEach(order => { %>
+                    <tr>
+                      <td><%= new Date(order.created_at).toLocaleDateString() %></td>
+                      <td><%= order.mobile %></td>
+                      <td><%= order.address %></td>
+                      <td>
+                        <span class="badge badge-<%= order.status.toLowerCase() %>">
+                          <i class="fas <%= order.status === 'PENDING' ? 'fa-spinner fa-spin' : (order.status === 'COMPLETED' ? 'fa-check-circle' : 'fa-info-circle') %>"></i>
+                          <%= order.status %>
+                        </span>
+                      </td>
+                      <td style="font-size: 12px; color: var(--text2);"><%= order.description %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Mobile View -->
+            <div class="mobile-card-list">
+              <% orders.forEach(order => { %>
+                <div class="mobile-card">
+                  <div class="mob-card-badge">
+                    <span class="badge badge-<%= order.status.toLowerCase() %>"><%= order.status %></span>
+                  </div>
+                  <div class="mob-card-id"><%= new Date(order.created_at).toLocaleDateString() %></div>
+                  <div class="mob-card-subtitle"><%= order.mobile %></div>
+                  <div class="mob-card-row">
+                    <div class="mob-card-label">Deliver to:</div>
+                    <div class="mob-card-value"><%= order.address %></div>
+                  </div>
+                  <div class="mob-card-row">
+                    <div class="mob-card-label">Description:</div>
+                    <div class="mob-card-value"><%= order.description %></div>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          <% } else { %>
+            <div class="empty-state">
+              <i class="fas fa-receipt"></i>
+              <div class="empty-state-text">No order history found yet. Place your first order to get started!</div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

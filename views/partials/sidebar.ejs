@@ -37,12 +37,21 @@
       <button class="nav-item scan-btn-trigger" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer;">
         <i class="fas fa-qrcode"></i> Scan Delivery
       </button>
+      <a href="/orders" class="nav-item <%= locals.activePage === 'orders' ? 'active' : '' %>">
+        <i class="fas fa-clipboard-list"></i> Order History
+      </a>
+      <a href="/orders/new" class="nav-item">
+        <i class="fas fa-cart-plus"></i> Place Order
+      </a>
     <% } %>
 
     <% if (user.role === 'owner') { %>
       <div class="nav-section-label">Administration</div>
       <a href="/users" class="nav-item <%= locals.activePage === 'users' ? 'active' : '' %>">
         <i class="fas fa-users-gear"></i> User Management
+      </a>
+      <a href="/orders/manage" class="nav-item <%= locals.activePage === 'orders' ? 'active' : '' %>">
+        <i class="fas fa-clipboard-check"></i> Manage Orders
       </a>
       <a href="/settings" class="nav-item">
         <i class="fas fa-sliders"></i> Global Settings

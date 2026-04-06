@@ -112,19 +112,27 @@ async function confirmReceipt(id) {
     try {
         const response = await fetch(`/lots/receive/${id}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
         });
         
+        const result = await response.json();
+        
         if (response.ok) {
-            showToast("Lot received successfully!", "success");
-            setTimeout(() => location.reload(), 1500);
+            showToast("Shipment Checked & Received!", "success");
+            // Direct redirect to view the updated status
+            if (result.redirectUrl) {
+                setTimeout(() => window.location.href = result.redirectUrl, 800);
+            }
         } else {
-            const err = await response.text();
-            showToast(err || "Failed to receive lot", "error");
+            showToast(result.error || result.message || "Action Forbidden", "error");
             hideLoader();
+            // Re-open scanner if needed
         }
     } catch (err) {
-        showToast("Network error", "error");
+        showToast("Access Restricted: Parcel not dispatched", "error");
         hideLoader();
     }
 }

@@ -88,7 +88,7 @@
     <div class="card" style="margin-top: 24px; padding: 24px; text-align: center;">
         <div class="card-title" style="margin-bottom: 16px;">Warehouse Controls</div>
         <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-            <% if (lot.status === 'PACKED') { %>
+            <% if (lot.status === 'PACKED' && (user.role === 'owner' || user.role === 'staff')) { %>
                 <form action="/lots/dispatch/<%= lot.id %>" method="POST">
                     <button type="submit" class="btn btn-primary" style="height: 48px; padding: 0 32px;">
                         <i class="fas fa-truck-fast"></i> Mark as Dispatched
