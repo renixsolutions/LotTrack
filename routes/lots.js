@@ -50,10 +50,14 @@ router.get('/view/:id', isLoggedIn, async (req, res) => {
 
     const items = await db('lot_items').where('lot_id', lot.id);
     const shop = await db('users').where('id', lot.shop_id).first();
+    const BASE_URL = process.env.BASE_URL || `http://${req.headers.host}`;
+    const qrCode = await QRCode.toDataURL(`${BASE_URL}/lot/${lot.id}`);
+
     res.render('view_lot', { 
         lot, 
         items, 
         shop, 
+        qrCode,
         user: req.session.user,
         activePage: 'lots', 
         pageTitle: 'Shipment Detail' 

@@ -95,13 +95,37 @@
                     </button>
                 </form>
             <% } %>
-            <button class="btn btn-outline" style="height: 48px; padding: 0 32px;" onclick="window.print()">
-                <i class="fas fa-print"></i> Print QR Label
+            <button class="btn btn-outline" style="height: 48px; padding: 0 32px;" onclick="openModal('qrPrintModal')">
+                <i class="fas fa-qrcode"></i> View & Print Label
             </button>
         </div>
     </div>
   </div>
-</main>
+<!-- PRINT QR MODAL -->
+<div class="overlay" id="qrPrintModal">
+    <div class="modal" style="max-width: 400px; text-align: center;">
+        <div class="modal-header">
+            <div class="modal-title">Shipment Label</div>
+            <button class="modal-close" onclick="closeModal('qrPrintModal')">×</button>
+        </div>
+        <div class="modal-body print-area">
+            <h2 style="font-family: 'Syne', sans-serif; margin-bottom: 5px;">LotTrack</h2>
+            <div style="font-size: 11px; font-weight: 700; color: var(--text3); margin-bottom: 15px; text-transform: uppercase;">Premium Warehouse Logistics</div>
+            
+            <div style="background: white; padding: 20px; border: 2px solid var(--border); border-radius: 16px; display: inline-block; margin-bottom: 15px;">
+                <img src="<%= qrCode %>" alt="QR Code" style="width: 250px; height: 250px; display: block;">
+            </div>
+
+            <div style="font-family: monospace; font-size: 14px; font-weight: 800; color: var(--accent); margin-bottom: 4px;">#<%= lot.id.substring(0, 16) %></div>
+            <div style="font-size: 13px; font-weight: 700;">TO: <%= shop.full_name %></div>
+            <div style="font-size: 11px; color: var(--text3); margin-top: 4px;"><%= new Date(lot.created_at).toLocaleDateString() %></div>
+        </div>
+        <div class="modal-footer" style="justify-content: center;">
+            <button class="btn btn-primary" onclick="window.print()" style="width: 100%;">
+                <i class="fas fa-print"></i> Print Now
+            </button>
+        </div>
+    </div>
 </div>
 </body>
 </html>
