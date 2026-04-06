@@ -67,18 +67,22 @@ function showToast(message, type = 'info') {
 // Handle success/error from URL params automatically
 // Page Loader Controls
 function showLoader() {
-    const loader = document.getElementById('pageLoader');
     document.body.classList.add('loading');
-    document.getElementById('pageLoader').classList.add('show');
-    const overlay = document.getElementById('loadingOverlay');
-    if (overlay) overlay.classList.add('show');
+    const bar = document.getElementById('topProgressBar');
+    const brand = document.getElementById('brandLoader');
+    if (bar) bar.classList.add('loading');
+    if (brand) brand.classList.add('show');
 }
 
 function hideLoader() {
     document.body.classList.remove('loading');
-    document.getElementById('pageLoader').classList.remove('show');
-    const overlay = document.getElementById('loadingOverlay');
-    if (overlay) overlay.classList.remove('show');
+    const bar = document.getElementById('topProgressBar');
+    const brand = document.getElementById('brandLoader');
+    if (bar) bar.classList.remove('loading');
+    if (brand) {
+        // Slight delay for brand loader to feel natural
+        setTimeout(() => brand.classList.remove('show'), 300);
+    }
 }
 
 // Global Navigation/Form Loader Logic

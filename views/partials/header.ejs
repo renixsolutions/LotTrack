@@ -13,10 +13,13 @@
 </head>
 <body class="<%= locals.bodyClass || '' %>">
   
-  <!-- Global Loader (Top Center - Isolated from blur) -->
-  <div id="pageLoader" class="page-loader">
-    <div class="loader-spinner"></div>
-    <span>Loading...</span>
+  <!-- Premium Progress Bar (Top) -->
+  <div id="topProgressBar" class="top-progress-bar"></div>
+
+  <!-- Premium Brand Loader (Center Overlay) -->
+  <div id="brandLoader" class="brand-loader">
+    <div class="loader-logo">LotTrack</div>
+    <div class="loader-msg">Syncing Warehouse Data...</div>
   </div>
 
   <!-- Sidebar Backdrop for Mobile -->
