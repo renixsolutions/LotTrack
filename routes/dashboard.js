@@ -93,4 +93,13 @@ router.get('/', isLoggedIn, async (req, res) => {
   }
 });
 
+// Settings Page
+router.get('/settings', isLoggedIn, (req, res) => {
+  res.render('settings', { 
+    user: req.session.user,
+    activePage: 'settings', 
+    pageTitle: 'Account Settings' 
+  });
+});
+
 module.exports = router;

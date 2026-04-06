@@ -66,7 +66,7 @@
         <div class="mob-nav-item"></div> <!-- Symmetry Spacer -->
     <% } %>
 
-    <a href="/auth/logout" class="mob-nav-item">
+    <a href="javascript:void(0)" class="mob-nav-item" onclick="openModal('logoutModal')">
         <i class="fas fa-power-off"></i>
         <span>Exit</span>
     </a>
@@ -79,6 +79,9 @@
   <% if (user && user.role === 'shop_owner') { %>
     <%- include('scanner_modal') %>
   <% } %>
+
+  <!-- Include Global Logout Confirmation -->
+  <%- include('logout_modal') %>
 
   <script src="/js/app.js"></script>
 

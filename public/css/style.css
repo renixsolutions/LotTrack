@@ -133,7 +133,7 @@ tr:hover td { background: var(--surface2); }
 .mob-nav-item.active { color: var(--accent); }
 
 /* MOBILE CARD LIST (For Tables) */
-.mobile-card-list { display: none; flex-direction: column; gap: 12px; }
+.mobile-card-list { display: none; flex-direction: column; gap: 12px; padding: 0 16px 16px; }
 .mobile-card { background: var(--surface); border-radius: var(--radius); padding: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); position: relative; }
 .mob-card-badge { position: absolute; top: 16px; right: 16px; }
 .mob-card-id { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 14px; color: var(--accent); margin-bottom: 4px; }

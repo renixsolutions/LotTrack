@@ -83,3 +83,11 @@ app.get('/lot/:id', async (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// 404 Handler - Must be last
+app.use((req, res) => {
+  res.status(404).render('404', { 
+    user: req.session.user || null,
+    pageTitle: 'Page Not Found' 
+  });
+});
