@@ -1,0 +1,110 @@
+<%- include('../partials/header') %>
+<%- include('../partials/sidebar', { activePage: 'dashboard' }) %>
+
+<main class="main">
+  <header class="topbar" style="background: var(--surface); border-bottom: 2px solid var(--orange-light);">
+    <div class="flex gap-8">
+      <div class="topbar-title">Shop Dashboard</div>
+    </div>
+    <div class="topbar-right">
+      <a href="/orders/new" class="btn" style="background:var(--orange); color:white;">
+        <i class="fas fa-cart-plus"></i> Place Order
+      </a>
+    </div>
+  </header>
+
+  <div class="page-content">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:var(--orange-light)">
+          <i class="fas fa-truck-ramp-box" style="color:var(--orange)"></i>
+        </div>
+        <div class="stat-label">In-Transit</div>
+        <div class="stat-value" style="color:var(--orange)"><%= incomingLots.length %></div>
+        <div class="stat-sub">Coming soon</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon" style="background:var(--accent-light)">
+          <i class="fas fa-check-double" style="color:var(--accent)"></i>
+        </div>
+        <div class="stat-label">Received</div>
+        <div class="stat-value" style="color:var(--accent)"><%= recentReceived.length %></div>
+        <div class="stat-sub">Recent</div>
+      </div>
+    </div>
+
+    <!-- INCOMING LOTS -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Pending Shipments</div>
+            <div class="text-sm">Please scan upon delivery</div>
+        </div>
+
+        <!-- DESKTOP TABLE -->
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Lot ID</th>
+                        <th>Status</th>
+                        <th>Date Dispatched</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% incomingLots.forEach(lot => { %>
+                        <tr>
+                            <td><span class="lot-id">#<%= lot.id.substring(0, 10) %></span></td>
+                            <td><span class="badge badge-<%= lot.status.toLowerCase() %>"><%= lot.status %></span></td>
+                            <td class="text-sm"><%= new Date(lot.dispatched_at).toLocaleDateString() %></td>
+                            <td style="text-align: right;">
+                                <a href="/lot/<%= lot.id %>" class="btn btn-outline btn-sm">Scan to Receive</a>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- MOBILE CARD LIST -->
+        <div class="mobile-card-list">
+            <% incomingLots.forEach(lot => { %>
+                <div class="mobile-card">
+                    <div class="mob-card-badge">
+                        <span class="badge badge-<%= lot.status.toLowerCase() %>"><%= lot.status %></span>
+                    </div>
+                    <div class="mob-card-id">#<%= lot.id.substring(0, 12) %></div>
+                    <div class="mob-card-subtitle">Expected Inventory</div>
+                    
+                    <div class="mob-card-row">
+                        <span class="mob-card-label">Dispatched:</span>
+                        <span class="mob-card-value"><%= new Date(lot.dispatched_at).toLocaleDateString() %></span>
+                    </div>
+
+                    <div class="mob-card-actions">
+                        <a href="/lot/<%= lot.id %>" class="btn btn-sm" style="flex: 1; background:var(--orange); color:white; justify-content: center;">
+                            <i class="fas fa-qrcode"></i> Scan Delivery
+                        </a>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+
+        <% if (incomingLots.length === 0) { %>
+            <div class="empty-state">
+                <i class="fas fa-truck-fast"></i>
+                <div class="empty-state-text">No incoming shipments at the moment. You're all caught up!</div>
+            </div>
+        <% } %>
+
+        <!-- PAGINATION -->
+        <div style="padding: 0 16px;">
+            <%- include('../partials/pagination') %>
+        </div>
+    </div>
+  </div>
+</main>
+</div>
+</body>
+</html>

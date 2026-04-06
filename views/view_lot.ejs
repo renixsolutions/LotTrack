@@ -1,0 +1,107 @@
+<%- include('partials/header', { pageTitle: 'Shipment Details' }) %>
+<%- include('partials/sidebar', { activePage: 'lots' }) %>
+
+<main class="main">
+  <header class="topbar">
+    <div class="flex gap-8">
+      <div class="topbar-title">Lot ID: #<%= lot.id.substring(0, 8) %></div>
+    </div>
+    <div class="topbar-right">
+      <a href="/lot/<%= lot.id %>" target="_blank" class="btn btn-outline">
+        <i class="fas fa-qrcode"></i> Public View
+      </a>
+    </div>
+  </header>
+
+  <div class="page-content">
+    <!-- LOT INFO CARDS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:var(--accent-light)">
+            <i class="fas fa-truck-ramp-box" style="color:var(--accent)"></i>
+        </div>
+        <div class="stat-label">Destination</div>
+        <div class="stat-value" style="color:var(--accent); font-size: 16px;"><%= shop.full_name %></div>
+        <div class="stat-sub"><%= shop.email %></div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background:var(--blue-light)">
+            <i class="fas fa-circle-info" style="color:var(--blue)"></i>
+        </div>
+        <div class="stat-label">Current Status</div>
+        <div class="stat-value" style="color:var(--blue); font-size: 16px;">
+            <span class="badge badge-<%= lot.status.toLowerCase() %>"><%= lot.status %></span>
+        </div>
+        <div class="stat-sub">Updated <%= new Date(lot.updated_at || lot.created_at).toLocaleDateString() %></div>
+      </div>
+    </div>
+
+    <!-- ITEM LIST -->
+    <div class="card" style="margin-top: 24px;">
+      <div class="card-header">
+        <div class="card-title">Manifest (<%= items.length %> Items)</div>
+      </div>
+
+      <!-- DESKTOP VIEW -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Item Name</th>
+              <th style="text-align: right;">Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% items.forEach(item => { %>
+              <tr>
+                <td class="fw-600"><%= item.item_name %></td>
+                <td style="text-align: right; font-weight: 800; color: var(--accent);">×<%= item.quantity %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- MOBILE VIEW (CARD STACKS) -->
+      <div class="mobile-card-list">
+        <% items.forEach(item => { %>
+          <div class="mobile-card" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;">
+            <div>
+                <div class="mob-card-label">Item Name</div>
+                <div class="fw-700" style="font-size: 15px;"><%= item.item_name %></div>
+            </div>
+            <div style="text-align: right;">
+                <div class="mob-card-label">Quantity</div>
+                <div class="fw-800" style="font-size: 16px; color: var(--accent);">×<%= item.quantity %></div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+
+      <% if (items.length === 0) { %>
+        <div class="empty-state">No items found in this lot.</div>
+      <% } %>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="card" style="margin-top: 24px; padding: 24px; text-align: center;">
+        <div class="card-title" style="margin-bottom: 16px;">Warehouse Controls</div>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <% if (lot.status === 'PACKED') { %>
+                <form action="/lots/dispatch/<%= lot.id %>" method="POST">
+                    <button type="submit" class="btn btn-primary" style="height: 48px; padding: 0 32px;">
+                        <i class="fas fa-truck-fast"></i> Mark as Dispatched
+                    </button>
+                </form>
+            <% } %>
+            <button class="btn btn-outline" style="height: 48px; padding: 0 32px;" onclick="window.print()">
+                <i class="fas fa-print"></i> Print QR Label
+            </button>
+        </div>
+    </div>
+  </div>
+</main>
+</div>
+</body>
+</html>

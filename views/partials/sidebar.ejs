@@ -1,0 +1,67 @@
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">LotTrack</div>
+    <div class="logo-sub">Warehouse Elite</div>
+  </div>
+
+  <% 
+    let roleColor = user.role === 'owner' ? 'var(--accent)' : (user.role === 'staff' ? 'var(--blue)' : 'var(--orange)');
+    let roleBg = user.role === 'owner' ? 'var(--accent-light)' : (user.role === 'staff' ? 'var(--blue-light)' : 'var(--orange-light)');
+  %>
+
+  <div class="sidebar-role" style="background-color: <%= roleBg %>; border-color: <%= roleColor %>;">
+    <div class="role-dot" style="background-color: <%= roleColor %>;"></div>
+    <span class="role-label" style="color: <%= roleColor %>;">
+        <%= user.role.replace('_', ' ').toUpperCase() %>
+    </span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main Console</div>
+    <a href="/" class="nav-item <%= locals.activePage === 'dashboard' ? 'active' : '' %>">
+      <i class="fas fa-th-large"></i> Dashboard
+    </a>
+    <a href="/lots" class="nav-item <%= locals.activePage === 'lots' ? 'active' : '' %>">
+      <i class="fas fa-boxes-stacked"></i> All Shipments
+    </a>
+
+    <% if (user.role === 'owner' || user.role === 'staff') { %>
+      <div class="nav-section-label">Warehouse Ops</div>
+      <a href="/lots/create" class="nav-item <%= locals.activePage === 'create_lot' ? 'active' : '' %>">
+        <i class="fas fa-plus-circle"></i> New Parcel
+      </a>
+    <% } %>
+
+    <% if (user.role === 'shop_owner') { %>
+      <div class="nav-section-label">Shop Ops</div>
+      <button class="nav-item scan-btn-trigger" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer;">
+        <i class="fas fa-qrcode"></i> Scan Delivery
+      </button>
+    <% } %>
+
+    <% if (user.role === 'owner') { %>
+      <div class="nav-section-label">Administration</div>
+      <a href="/users" class="nav-item <%= locals.activePage === 'users' ? 'active' : '' %>">
+        <i class="fas fa-users-gear"></i> User Management
+      </a>
+      <a href="/settings" class="nav-item">
+        <i class="fas fa-sliders"></i> Global Settings
+      </a>
+    <% } %>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="avatar" style="background-color: <%= roleBg %>;">
+        <%= (user.full_name || 'User').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() %>
+      </div>
+      <div class="user-info">
+        <div class="user-name"><%= user.full_name || 'System User' %></div>
+        <div class="user-status">Online • Active</div>
+      </div>
+    </div>
+    <a href="/auth/logout" class="nav-item" style="border: none; margin-top: 8px; color: var(--orange);">
+        <i class="fas fa-power-off"></i> Logout
+    </a>
+  </div>
+</aside>

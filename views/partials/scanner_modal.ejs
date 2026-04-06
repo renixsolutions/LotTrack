@@ -1,0 +1,131 @@
+<div class="overlay" id="scannerModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">Scan Delivery Parcel</div>
+            <button class="modal-close" onclick="stopScanner()">×</button>
+        </div>
+        <div class="modal-body">
+            <div id="reader-container">
+                <div id="reader" style="width: 100%; border-radius: 12px; overflow: hidden; background: #000; min-height: 250px;"></div>
+            </div>
+
+            <!-- CAMERA ERROR WARNING -->
+            <div id="camera-warning" style="display: none; padding: 16px; background: #FFF9F0; border: 1px solid #FFE5B4; border-radius: 12px; margin-top: 12px;">
+                <div style="color: #D35400; font-weight: 700; font-size: 14px; margin-bottom: 4px;">
+                    <i class="fas fa-exclamation-triangle"></i> Browser Restriction
+                </div>
+                <p class="text-sm" style="color: #6B4E31; line-height: 1.4;">
+                    Camera requires <strong>HTTPS</strong> or <strong>Localhost</strong>. 
+                </p>
+                <div style="margin-top: 8px;">
+                    <a href="https://ngrok.com" target="_blank" class="text-sm" style="color: #2D6A4F; font-weight: 700;">Use ngrok for HTTPS →</a>
+                </div>
+            </div>
+
+            <div style="margin: 20px 0; display: flex; align-items: center; gap: 12px;">
+                <hr style="flex: 1; border: none; border-top: 1px solid var(--border);">
+                <span style="font-size: 12px; color: var(--text3); font-weight: 700; text-transform: uppercase;">OR</span>
+                <hr style="flex: 1; border: none; border-top: 1px solid var(--border);">
+            </div>
+
+            <!-- MANUAL ENTRY -->
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 11px;">Manual ID Entry</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="manualLotId" class="form-input" placeholder="Paste Lot ID here..." style="font-family: monospace; font-size: 12px;">
+                    <button class="btn btn-primary btn-sm" onclick="handleManualSubmit()">Receive</button>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="justify-content: center;">
+            <button class="btn btn-outline" onclick="stopScanner()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let html5QrCode;
+
+async function startScanner() {
+    openModal('scannerModal');
+    
+    // Check for Secure Context / Media Devices
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.warn("Camera not available in this context (requires HTTPS)");
+        document.getElementById('camera-warning').style.display = 'block';
+        document.getElementById('reader-container').style.opacity = '0.3';
+        return;
+    }
+
+    setTimeout(async () => {
+        try {
+            html5QrCode = new Html5Qrcode("reader");
+            const config = { fps: 15, qrbox: { width: 250, height: 250 } };
+            
+            await html5QrCode.start(
+                { facingMode: "environment" }, 
+                config, 
+                onScanSuccess
+            );
+        } catch (err) {
+            console.error("Camera access failed", err);
+            document.getElementById('camera-warning').style.display = 'block';
+            showToast("Camera access denied or restricted", "error");
+        }
+    }, 300);
+}
+
+function stopScanner() {
+    document.getElementById('camera-warning').style.display = 'none';
+    document.getElementById('reader-container').style.opacity = '1';
+    if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+            closeModal('scannerModal');
+        }).catch(err => {
+            closeModal('scannerModal');
+        });
+    } else {
+        closeModal('scannerModal');
+    }
+}
+
+function handleManualSubmit() {
+    const id = document.getElementById('manualLotId').value.trim();
+    if (!id) return showToast("Enter a valid ID", "error");
+    confirmReceipt(id.replace('#', ''));
+    closeModal('scannerModal');
+}
+
+async function onScanSuccess(decodedText, decodedResult) {
+    console.log("Scanned:", decodedText);
+    const parts = decodedText.split('/');
+    const lotId = parts[parts.length - 1];
+    
+    if (lotId) {
+        stopScanner();
+        confirmReceipt(lotId);
+    }
+}
+
+async function confirmReceipt(id) {
+    showLoader();
+    try {
+        const response = await fetch(`/lots/receive/${id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+            showToast("Lot received successfully!", "success");
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            const err = await response.text();
+            showToast(err || "Failed to receive lot", "error");
+            hideLoader();
+        }
+    } catch (err) {
+        showToast("Network error", "error");
+        hideLoader();
+    }
+}
+</script>

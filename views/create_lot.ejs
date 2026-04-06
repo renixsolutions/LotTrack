@@ -1,0 +1,92 @@
+<%- include('partials/header') %>
+<%- include('partials/sidebar', { activePage: 'create_lot' }) %>
+
+<main class="main">
+  <header class="topbar">
+    <div class="flex gap-8">
+      <div class="topbar-title">Parcel Assembly</div>
+    </div>
+  </header>
+
+  <div class="page-content" style="display: flex; justify-content: center;">
+    <div class="modal modal-lg" style="box-shadow: var(--shadow-md); margin-top: 2rem;">
+      <div class="modal-header">
+        <div class="modal-title">New Dispatch Lot</div>
+        <div class="text-sm">Pack and assign items to a shop.</div>
+      </div>
+      <form action="/lots/create" method="POST">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Destination Shop *</label>
+              <select name="shop_id" class="form-select" required>
+                <option value="">Select shop...</option>
+                <% shops.forEach(shop => { %>
+                  <option value="<%= shop.id %>"><%= shop.full_name %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Logistics Lead</label>
+              <input type="text" class="form-input" value="<%= user.name %>" readonly style="background: var(--surface2);">
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="flex-between mb-16">
+            <label class="form-label">Packing List (Items)</label>
+            <button type="button" class="btn btn-outline btn-sm" id="addItem">+ Add Line Item</button>
+          </div>
+
+          <div class="items-list" id="itemsList">
+            <style>
+              .item-row { display: grid; grid-template-columns: 1fr 100px 48px; gap: 12px; margin-bottom: 12px; align-items: flex-end; animation: fadeIn 0.3s ease; }
+              .item-qty-wrap { display: flex; flex-direction: column; gap: 6px; }
+              .item-remove { height: 42px; width: 42px; display: flex; align-items: center; justify-content: center; background: #FFF5F5; color: #E53E3E; border: 1.5px solid #FED7D7; border-radius: 10px; cursor: pointer; transition: all 0.2s; font-size: 18px; }
+              .item-remove:hover { background: #E53E3E; color: white; border-color: #E53E3E; }
+              @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+            </style>
+            <div class="item-row">
+              <div class="item-qty-wrap">
+                <label class="form-label" style="font-size: 10px;">Product Name</label>
+                <input type="text" name="item_names" class="form-input" placeholder="e.g. Gold Chain 22k" required>
+              </div>
+              <div class="item-qty-wrap">
+                <label class="form-label" style="font-size: 10px;">Qty</label>
+                <input type="number" name="quantities" class="form-input" value="1" min="1" required>
+              </div>
+              <button type="button" class="item-remove" onclick="this.parentElement.remove()"><i class="fas fa-trash-can" style="font-size: 14px;"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <a href="/lots" class="btn btn-outline">Discard</a>
+          <button type="submit" class="btn btn-primary">Generate QR & Create Lot</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<script>
+  document.getElementById('addItem').addEventListener('click', () => {
+    const list = document.getElementById('itemsList');
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+      <div class="item-qty-wrap">
+        <input type="text" name="item_names" class="form-input" placeholder="Product name" required>
+      </div>
+      <div class="item-qty-wrap">
+        <input type="number" name="quantities" class="form-input" value="1" min="1" required>
+      </div>
+      <button type="button" class="item-remove" onclick="this.parentElement.remove()"><i class="fas fa-trash-can" style="font-size: 14px;"></i></button>
+    `;
+    list.appendChild(row);
+  });
+</script>
+</div>
+</body>
+</html>

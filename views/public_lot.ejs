@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Shipment Details — Renix Solutions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Minimized scoped styles for public tracking */
+    :root { --accent: #2D6A4F; --bg: #F5F4F0; --surface: #FFFFFF; --border: #E2DDD4; --text: #1A1814; --radius: 16px; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); padding: 12px; margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+    .scan-container { width: 100%; max-width: 440px; margin-top: 5vh; }
+    .scan-card { background: var(--surface); border-radius: var(--radius); padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1.5px solid var(--border); overflow: hidden; }
+    .scan-header { text-align: center; margin-bottom: 24px; }
+    .lot-tag { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 11px; letter-spacing: 1px; color: var(--accent); background: #D8F3DC; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 8px; }
+    .qr-preview { background: #fdfdfd; border: 2px dashed var(--border); border-radius: 16px; padding: 16px; margin: 20px 0; text-align: center; }
+    .qr-preview img { width: 160px; height: 160px; border-radius: 8px; }
+    .status-ribbon { padding: 8px; text-align: center; font-weight: 800; font-size: 13px; text-transform: uppercase; border-radius: 8px; margin-bottom: 20px; }
+    .status-dispatched { background: #D6E8F7; color: #2D5D8A; }
+    .status-received { background: #D8F3DC; color: #2D6A4F; }
+    .status-packed { background: #FDF3D6; color: #B07D00; }
+    .inventory-list { border-top: 1px solid var(--border); margin-top: 24px; padding-top: 16px; }
+    .item-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed var(--border); font-size: 14px; }
+    .item-row:last-child { border-bottom: none; }
+    .action-button { display: block; width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: 800; font-size: 16px; cursor: pointer; text-align: center; text-decoration: none; margin-top: 24px; box-shadow: 0 4px 20px rgba(45, 106, 79, 0.3); }
+    .action-button:hover { background: #1f4f3a; }
+  </style>
+</head>
+<body>
+
+  <div class="scan-container">
+    <div class="scan-header">
+        <h2 style="font-family: 'Syne', sans-serif; font-size: 20px;">Parcel Tracking</h2>
+        <p style="color: #9B948C; font-size: 12px; font-weight: 500;">Secure Warehouse Logistics</p>
+    </div>
+
+    <div class="scan-card">
+      <div style="text-align: center;">
+        <span class="lot-tag">LOT #<%= lot.id.substring(0, 12).toUpperCase() %></span>
+        <div class="status-ribbon status-<%= lot.status.toLowerCase() %>">
+            <%= lot.status %>
+        </div>
+      </div>
+
+      <div class="qr-preview">
+          <img src="<%= qrImage %>" alt="Lot QR Code">
+          <p style="font-size: 11px; color: #9B948C; margin-top: 8px;">Scan ID: <%= lot.id %></p>
+      </div>
+
+      <div style="padding: 0 4px;">
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <i class="fas fa-location-dot" style="margin-top: 4px; color: var(--accent);"></i>
+            <div>
+                <p style="font-size: 11px; font-weight: 700; color: #9B948C; text-transform: uppercase;">Destination Shop</p>
+                <p style="font-size: 14px; font-weight: 600;"><%= shop.full_name %></p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <i class="fas fa-calendar" style="margin-top: 4px; color: var(--accent);"></i>
+            <div>
+                <p style="font-size: 11px; font-weight: 700; color: #9B948C; text-transform: uppercase;">Packed At</p>
+                <p style="font-size: 14px; font-weight: 600;"><%= new Date(lot.created_at).toLocaleDateString() %></p>
+            </div>
+        </div>
+      </div>
+
+      <div class="inventory-list">
+        <p style="font-size: 12px; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; color: #9B948C;">Package Inventory</p>
+        <% items.forEach(item => { %>
+          <div class="item-row">
+            <span style="font-weight: 600;"><%= item.item_name %></span>
+            <span style="font-weight: 800; color: var(--accent);">×<%= item.quantity %></span>
+          </div>
+        <% }); %>
+      </div>
+
+      <!-- ROLE-BASED ACTION -->
+      <% if (locals.user && locals.user.role === 'shop_owner' && locals.user.id === lot.shop_id && lot.status === 'DISPATCHED') { %>
+        <form action="/lots/receive/<%= lot.id %>" method="POST">
+          <button type="submit" class="action-button">
+            <i class="fas fa-check-circle"></i> Acknowledge Receipt
+          </button>
+        </form>
+      <% } else if (lot.status === 'RECEIVED') { %>
+         <div style="margin-top: 24px; text-align: center; color: var(--accent); font-weight: 800; font-size: 14px; padding: 12px; background: #D8F3DC; border-radius: 12px;">
+           <i class="fas fa-circle-check"></i> Package Successfully Delivered
+         </div>
+      <% } else if (!locals.user) { %>
+         <p style="text-align: center; font-size: 12px; color: #9B948C; margin-top: 24px; font-style: italic;">
+           Login as shop owner to confirm delivery.
+         </p>
+         <a href="/auth/login" class="action-button" style="background: #1A1814; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">Staff Login</a>
+      <% } %>
+    </div>
+    
+    <div style="text-align: center; margin-top: 32px;">
+        <p style="font-size: 10px; font-weight: 700; color: #9B948C; letter-spacing: 2px;">RENIX LOGISTICS PORTAL</p>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+<%- include('partials/header') %>
+<%- include('partials/sidebar', { activePage: 'manage_orders' }) %>
+
+<main class="main-content">
+  <div class="container">
+    <header style="margin-bottom: 3.5rem;">
+      <h1 style="font-weight: 800; font-size: 2.2rem;">Pending Shop Orders</h1>
+      <p style="color: var(--text-muted);">Review and fulfill requests from shop owners.</p>
+    </header>
+
+    <div class="card glass" style="padding: 2rem;">
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Shop Name</th>
+            <th>Description</th>
+            <th>Requested At</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% orders.forEach(order => { %>
+            <tr>
+              <td style="font-size: 0.8rem; font-weight: 700;">#ORD-<%= order.id %></td>
+              <td><%= order.shop_name %></td>
+              <td style="font-size: 0.8rem; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= order.description %></td>
+              <td style="font-size: 0.8rem;"><%= new Date(order.created_at).toLocaleDateString() %></td>
+              <td>
+                <% 
+                  let badgeBg = 'var(--accent)';
+                  if (order.status === 'FULFILLED') badgeBg = 'var(--success)';
+                  else if (order.status === 'ACKNOWLEDGED') badgeBg = 'var(--secondary)';
+                %>
+                <span class="status-badge" style="background: <%= badgeBg %>">
+                  <%= order.status %>
+                </span>
+              </td>
+              <td style="display: flex; gap: 0.5rem;">
+                 <% if (order.status !== 'FULFILLED') { %>
+                   <form action="/orders/update-status/<%= order.id %>" method="POST">
+                     <select name="status" class="form-control" style="font-size: 0.7rem; padding: 0.2rem 0.5rem; width: auto;" onchange="this.form.submit()">
+                       <option value="PENDING" <%= order.status === 'PENDING' ? 'selected' : '' %>>Wait</option>
+                       <option value="ACKNOWLEDGED" <%= order.status === 'ACKNOWLEDGED' ? 'selected' : '' %>>Acknowledge</option>
+                       <option value="FULFILLED" <%= order.status === 'FULFILLED' ? 'selected' : '' %>>Complete</option>
+                     </select>
+                   </form>
+                   <a href="/lots/create?order_id=<%= order.id %>" class="btn btn-primary" style="padding: 0.3rem 0.6rem; font-size: 0.7rem;">Fulfill Lot</a>
+                 <% } %>
+              </td>
+            </tr>
+          <% }); %>
+          <% if (orders.length === 0) { %>
+            <tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 5rem;">Order queue is empty.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+</div>
+</body>
+</html>

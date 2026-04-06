@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — LotTrack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body style="background: var(--bg); display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+
+  <div class="card" style="width: 400px; padding: 40px; border-radius: 24px; box-shadow: var(--shadow-md); border: none;">
+    <div style="text-align: center; margin-bottom: 32px;">
+      <div class="logo-mark" style="font-size: 28px; letter-spacing: -1px; margin-bottom: 4px;">LotTrack</div>
+      <div class="logo-sub" style="font-size: 12px; font-weight: 700; color: var(--text3);">Portal Security Access</div>
+    </div>
+
+    <form action="/auth/login" method="POST">
+      <div class="form-group">
+        <label class="form-label">Professional Email</label>
+        <input type="email" name="email" class="form-input" placeholder="email@renix.com" required style="height: 44px;">
+      </div>
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label class="form-label">Password Access</label>
+        <input type="password" name="password" class="form-input" placeholder="••••••••" required style="height: 44px;">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; height: 48px; font-size: 15px;">
+        Authorize & Enter
+      </button>
+    </form>
+
+    <div style="margin-top: 32px; text-align: center; font-size: 12px; color: var(--text3); font-weight: 600;">
+        RENIX SOLUTIONS &copy; 2025
+    </div>
+  </div>
+
+</body>
+</html>

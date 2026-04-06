@@ -1,0 +1,230 @@
+<%- include('partials/header') %>
+<%- include('partials/sidebar', { activePage: 'users' }) %>
+
+<main class="main">
+  <header class="topbar">
+    <div class="flex gap-8">
+      <div class="topbar-title">Users & Partnerships</div>
+    </div>
+    <div class="topbar-right">
+        <button class="btn btn-primary" onclick="openModal('addUserModal')">
+            <i class="fas fa-user-plus"></i> Add User
+        </button>
+    </div>
+  </header>
+
+  <div class="page-content">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Active Accounts</div>
+        <button class="btn btn-primary btn-sm hamburger" onclick="openModal('addUserModal')">
+            <i class="fas fa-plus"></i>
+        </button>
+      </div>
+
+      <!-- DESKTOP TABLE -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Profile</th>
+              <th>Role</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% users.forEach(u => { %>
+              <tr>
+                <td>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <div class="avatar" style="width: 32px; height: 32px; font-size: 11px;">
+                            <%= u.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() %>
+                        </div>
+                        <div>
+                            <p class="fw-600"><%= u.full_name %></p>
+                            <p class="text-sm"><%= u.email %></p>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <% 
+                        let col = u.role === 'owner' ? '--accent' : (u.role === 'staff' ? '--blue' : '--orange');
+                        let bg = u.role === 'owner' ? '--accent-light' : (u.role === 'staff' ? '--blue-light' : '--orange-light');
+                    %>
+                    <span class="badge" style="background-color: var(<%= bg %>); color: var(<%= col %>);">
+                        <%= u.role.replace('_', ' ') %>
+                    </span>
+                </td>
+                <td>
+                    <div class="action-btns">
+                        <button class="btn btn-icon btn-sm" style="color: var(--blue);" onclick="openEditUserModal('<%= u.id %>', '<%= u.full_name %>', '<%= u.email %>', '<%= u.role %>')">
+                            <i class="fas fa-pen-to-square"></i>
+                        </button>
+                        <% if (u.role !== 'owner' && u.id !== user.id) { %>
+                            <button class="btn btn-icon btn-sm" style="color: var(--orange);" onclick="confirmDeleteUser('<%= u.id %>', '<%= u.full_name %>')">
+                                <i class="fas fa-trash-can"></i>
+                            </button>
+                        <% } %>
+                    </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- MOBILE CARD LIST -->
+      <div class="mobile-card-list">
+        <% users.forEach(u => { %>
+          <div class="mobile-card">
+            <div class="mob-card-badge">
+                <% 
+                    let col = u.role === 'owner' ? '--accent' : (u.role === 'staff' ? '--blue' : '--orange');
+                    let bg = u.role === 'owner' ? '--accent-light' : (u.role === 'staff' ? '--blue-light' : '--orange-light');
+                %>
+                <span class="badge" style="background-color: var(<%= bg %>); color: var(<%= col %>);">
+                    <%= u.role.replace('_', ' ') %>
+                </span>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px;">
+                <div class="avatar">
+                    <%= u.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() %>
+                </div>
+                <div>
+                    <div class="fw-600" style="font-size: 15px;"><%= u.full_name %></div>
+                    <div class="text-sm"><%= u.email %></div>
+                </div>
+            </div>
+            <% if (u.role !== 'owner' && u.id !== user.id) { %>
+                <div class="mob-card-actions">
+                    <form action="/users/delete/<%= u.id %>" method="POST" style="width: 100%;">
+                        <button type="submit" class="btn btn-danger btn-sm" style="width: 100%; justify-content: center;">
+                            <i class="fas fa-trash-can"></i> Archive User
+                        </button>
+                    </form>
+                </div>
+            <% } %>
+          </div>
+        <% }); %>
+      </div>
+
+      <% if (users.length === 0) { %>
+          <div class="empty-state">No user records found.</div>
+      <% } %>
+
+      <!-- PAGINATION -->
+      <div style="padding: 0 16px;">
+        <%- include('partials/pagination') %>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ADD USER MODAL -->
+<div class="overlay" id="addUserModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">Register New Account</div>
+            <button class="modal-close" onclick="closeModal('addUserModal')">×</button>
+        </div>
+        <form action="/users/add" method="POST">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="full_name" class="form-input" placeholder="e.g. Rahul Sharma" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Access</label>
+                    <input type="email" name="email" class="form-input" placeholder="rahul@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <select name="role" class="form-select">
+                        <option value="staff">Warehouse Staff</option>
+                        <option value="shop_owner">Shop Partner</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Temporary Password</label>
+                    <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('addUserModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Account</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- EDIT USER MODAL -->
+<div class="overlay" id="editUserModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">Edit Account Information</div>
+            <button class="modal-close" onclick="closeModal('editUserModal')">×</button>
+        </div>
+        <form id="editUserForm" action="/users/edit" method="POST">
+            <input type="hidden" name="id" id="editUserId">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="full_name" id="editUserName" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Access</label>
+                    <input type="email" name="email" id="editUserEmail" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <select name="role" id="editUserRole" class="form-select">
+                        <option value="staff">Warehouse Staff</option>
+                        <option value="shop_owner">Shop Partner</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('editUserModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- DELETE CONFIRMATION MODAL -->
+<div class="overlay" id="deleteUserModal">
+    <div class="modal modal-sm">
+        <div class="modal-header">
+            <div class="modal-title">Confirm Deletion</div>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to permanently delete user <strong id="deleteUserName"></strong>?</p>
+            <p class="text-sm" style="margin-top: 8px; color: var(--orange);">This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeModal('deleteUserModal')">Cancel</button>
+            <form id="deleteUserForm" method="POST">
+                <button type="submit" class="btn btn-primary" style="background: var(--orange);">Confirm Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openEditUserModal(id, name, email, role) {
+    document.getElementById('editUserId').value = id;
+    document.getElementById('editUserName').value = name;
+    document.getElementById('editUserEmail').value = email;
+    document.getElementById('editUserRole').value = role;
+    openModal('editUserModal');
+}
+
+function confirmDeleteUser(id, name) {
+    document.getElementById('deleteUserName').textContent = name;
+    document.getElementById('deleteUserForm').action = '/users/delete/' + id;
+    openModal('deleteUserModal');
+}
+</script>
+
+</div>
+</body>
+</html>

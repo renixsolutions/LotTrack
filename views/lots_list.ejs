@@ -1,0 +1,93 @@
+<%- include('partials/header') %>
+<%- include('partials/sidebar', { activePage: 'lots' }) %>
+
+<main class="main">
+  <header class="topbar">
+    <div class="flex gap-8">
+      <div class="topbar-title">All Lots Tracking</div>
+    </div>
+    <div class="topbar-right">
+        <% if (user.role === 'owner' || user.role === 'staff') { %>
+            <a href="/lots/create" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> Create Lot
+            </a>
+        <% } %>
+    </div>
+  </header>
+
+  <div class="page-content">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Lot Inventory</div>
+        <div class="text-sm">Active Shipments: <%= lots.length %></div>
+      </div>
+
+      <!-- DESKTOP TABLE -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tracking ID</th>
+              <th>Destination</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% lots.forEach(lot => { %>
+              <tr>
+                <td><span class="lot-id">#<%= lot.id.substring(0, 10).toUpperCase() %></span></td>
+                <td class="fw-600"><%= lot.shop_name %></td>
+                <td><span class="badge badge-<%= lot.status.toLowerCase() %>"><%= lot.status %></span></td>
+                <td class="text-sm"><%= new Date(lot.created_at).toLocaleDateString() %></td>
+                <td style="text-align: right;">
+                    <a href="/lots/view/<%= lot.id %>" class="btn btn-outline btn-sm">Details</a>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- MOBILE CARD LIST -->
+      <div class="mobile-card-list">
+        <% lots.forEach(lot => { %>
+          <div class="mobile-card">
+            <div class="mob-card-badge">
+                <span class="badge badge-<%= lot.status.toLowerCase() %>"><%= lot.status %></span>
+            </div>
+            <div class="mob-card-id">#<%= lot.id.substring(0, 12).toUpperCase() %></div>
+            <div class="mob-card-subtitle">DEPARTURE: WAREHOUSE</div>
+
+            <div class="mob-card-row">
+                <span class="mob-card-label">To:</span>
+                <span class="mob-card-value"><%= lot.shop_name %></span>
+            </div>
+            <div class="mob-card-row">
+                <span class="mob-card-label">Date:</span>
+                <span class="mob-card-value"><%= new Date(lot.created_at).toLocaleDateString() %></span>
+            </div>
+
+            <div class="mob-card-actions">
+                <a href="/lots/view/<%= lot.id %>" class="btn btn-outline btn-sm" style="flex: 1; justify-content: center;">Full Details</a>
+                <a href="/lot/<%= lot.id %>" target="_blank" class="btn btn-icon btn-sm"><i class="fas fa-qrcode"></i></a>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+
+      <% if (lots.length === 0) { %>
+          <div class="empty-state">No shipments found in the ledger.</div>
+      <% } %>
+
+      <!-- PAGINATION -->
+      <div style="padding: 0 16px;">
+        <%- include('partials/pagination') %>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+</body>
+</html>

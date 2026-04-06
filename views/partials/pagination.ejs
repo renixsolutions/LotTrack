@@ -1,0 +1,28 @@
+<% if (totalPages > 1) { %>
+<div class="pagination">
+    <a href="?page=1" class="page-btn <%= currentPage == 1 ? 'disabled' : '' %>" title="First Page">
+        <i class="fas fa-angles-left"></i>
+    </a>
+    <a href="?page=<%= currentPage - 1 %>" class="page-btn <%= currentPage == 1 ? 'disabled' : '' %>" title="Previous">
+        <i class="fas fa-angle-left"></i>
+    </a>
+
+    <% 
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+    %>
+
+    <% for(let i = startPage; i <= endPage; i++) { %>
+        <a href="?page=<%= i %>" class="page-btn <%= currentPage == i ? 'active' : '' %>">
+            <%= i %>
+        </a>
+    <% } %>
+
+    <a href="?page=<%= parseInt(currentPage) + 1 %>" class="page-btn <%= currentPage >= totalPages ? 'disabled' : '' %>" title="Next">
+        <i class="fas fa-angle-right"></i>
+    </a>
+    <a href="?page=<%= totalPages %>" class="page-btn <%= currentPage >= totalPages ? 'disabled' : '' %>" title="Last Page">
+        <i class="fas fa-angles-right"></i>
+    </a>
+</div>
+<% } %>

@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LotTrack — Owner Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+:root {
+  --bg: #F5F4F0;
+  --surface: #FFFFFF;
+  --surface2: #F0EEE8;
+  --border: #E2DDD4;
+  --text: #1A1814;
+  --text2: #6B6560;
+  --text3: #9B948C;
+  --accent: #2D6A4F;
+  --accent2: #52B788;
+  --accent-light: #D8F3DC;
+  --orange: #E76F51;
+  --orange-light: #FDEBD0;
+  --blue: #2D5D8A;
+  --blue-light: #D6E8F7;
+  --yellow: #E9C46A;
+  --yellow-light: #FDF3D6;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 24px rgba(0,0,0,0.10);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* LAYOUT */
+.layout { display: flex; min-height: 100vh; }
+.sidebar { width: 240px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; transition: transform 0.3s; }
+.sidebar-logo { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); }
+.logo-mark { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+.logo-sub { font-size: 11px; color: var(--text3); font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; }
+.sidebar-role { margin: 12px 16px; background: var(--accent-light); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; align-items: center; gap: 8px; }
+.role-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+.role-label { font-size: 12px; font-weight: 600; color: var(--accent); }
+.sidebar-nav { flex: 1; padding: 8px 0; overflow-y: auto; }
+.nav-section-label { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; padding: 12px 20px 4px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; cursor: pointer; border-radius: 0; font-size: 14px; font-weight: 500; color: var(--text2); transition: all 0.15s; border-left: 3px solid transparent; }
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: var(--accent-light); color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+.nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+.nav-badge { margin-left: auto; background: var(--orange); color: white; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
+.sidebar-footer { padding: 16px; border-top: 1px solid var(--border); }
+.user-card { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: var(--radius-sm); cursor: pointer; }
+.user-card:hover { background: var(--surface2); }
+.avatar { width: 36px; height: 36px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 700; color: white; font-size: 14px; flex-shrink: 0; }
+.user-name { font-size: 13px; font-weight: 600; }
+.user-role { font-size: 11px; color: var(--text3); }
+
+.main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+.topbar-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; font-family: 'DM Sans', sans-serif; }
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #1f4f3a; }
+.btn-outline { background: transparent; color: var(--text); border: 1.5px solid var(--border); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+.btn-danger { background: #FDECEA; color: #C0392B; border: 1.5px solid #F5C6C2; }
+.btn-danger:hover { background: #F5C6C2; }
+.btn-icon { padding: 8px; background: var(--surface2); border: none; border-radius: var(--radius-sm); cursor: pointer; }
+.btn-icon:hover { background: var(--border); }
+
+.page-content { padding: 24px; flex: 1; }
+.tab-section { display: none; }
+.tab-section.active { display: block; }
+
+/* STATS */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: var(--surface); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+.stat-label { font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.stat-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; }
+.stat-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+.stat-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+
+/* CARDS */
+.card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 20px; }
+.card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
+.card-body { padding: 20px; }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; background: var(--surface2); border-bottom: 1px solid var(--border); }
+td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface2); }
+
+/* BADGE */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; }
+.badge-packed { background: var(--yellow-light); color: #B07D00; }
+.badge-dispatched { background: var(--blue-light); color: var(--blue); }
+.badge-received { background: var(--accent-light); color: var(--accent); }
+.badge-pending { background: var(--orange-light); color: #C05000; }
+
+/* MODALS */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
+.overlay.show { display: flex; }
+.modal { background: var(--surface); border-radius: 16px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-md); animation: slideUp 0.25s ease; }
+.modal-lg { max-width: 680px; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+.modal-close { background: var(--surface2); border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 18px; color: var(--text2); display: flex; align-items: center; justify-content: center; }
+.modal-close:hover { background: var(--border); }
+.modal-body { padding: 24px; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+/* FORM */
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+.form-input, .form-select, .form-textarea { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--text); transition: border 0.15s; outline: none; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+.form-textarea { resize: vertical; min-height: 80px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* ITEMS LIST in lot creation */
+.items-list { border: 1.5px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+.item-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.item-row:last-child { border-bottom: none; }
+.item-name { flex: 1; font-size: 13px; font-weight: 500; }
+.item-qty { width: 70px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; text-align: center; font-family: 'DM Sans', sans-serif; }
+.item-remove { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 16px; }
+.item-remove:hover { color: var(--orange); }
+
+/* QR PAGE */
+.qr-box { background: white; border-radius: 16px; border: 2px dashed var(--border); padding: 24px; text-align: center; margin-bottom: 16px; }
+.qr-box canvas, .qr-box img { border-radius: 8px; }
+.lot-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.info-item { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; }
+.info-item-label { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
+.info-item-value { font-size: 13px; font-weight: 600; margin-top: 2px; }
+
+/* TOPBAR hamburger */
+.hamburger { display: none; background: none; border: none; cursor: pointer; padding: 4px; }
+
+/* NOTIFICATION */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: white; padding: 12px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500; z-index: 1000; animation: slideUp 0.3s ease; display: none; max-width: 320px; }
+.toast.show { display: block; }
+
+/* ORDER DETAIL */
+.order-detail-row { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+.order-detail-row:last-child { border-bottom: none; }
+.order-detail-label { font-size: 12px; font-weight: 700; color: var(--text3); text-transform: uppercase; width: 120px; flex-shrink: 0; padding-top: 1px; }
+.order-detail-value { font-size: 13px; flex: 1; }
+
+/* SHOP CARDS */
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.shop-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+.shop-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.shop-avatar { width: 44px; height: 44px; background: var(--blue); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; color: white; }
+.shop-name { font-weight: 700; font-size: 15px; }
+.shop-contact { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 48px 24px; color: var(--text3); }
+.empty-state svg { opacity: 0.3; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; }
+
+/* NOTIFICATION LIST */
+.notif-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.notif-item:last-child { border-bottom: none; }
+.notif-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.notif-content { flex: 1; }
+.notif-text { font-size: 13px; font-weight: 500; }
+.notif-time { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* MOBILE OVERLAY */
+.sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 99; }
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); width: 260px; }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-backdrop.show { display: block; }
+  .main { margin-left: 0; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .topbar { padding: 0 16px; }
+  .page-content { padding: 16px; }
+  .hamburger { display: flex; align-items: center; justify-content: center; }
+  .form-row { grid-template-columns: 1fr; }
+  .lot-info-grid { grid-template-columns: 1fr; }
+  .shop-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-value { font-size: 22px; }
+}
+
+/* Lot item badge colors */
+.lot-id { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--accent); }
+.action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* Staff chips */
+.staff-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 500; }
+.staff-chip-remove { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 14px; line-height: 1; }
+.staff-chip-remove:hover { color: var(--orange); }
+
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+.text-sm { font-size: 12px; color: var(--text3); }
+.fw-600 { font-weight: 600; }
+.mb-16 { margin-bottom: 16px; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.gap-8 { gap: 8px; }
+.flex { display: flex; align-items: center; }
+
+/* Search input */
+.search-box { position: relative; }
+.search-box input { padding-left: 36px; width: 200px; }
+.search-box svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text3); }
+
+/* Print styles */
+@media print {
+  .sidebar, .topbar, .modal-footer, .btn { display: none !important; }
+  .main { margin-left: 0; }
+  .modal { box-shadow: none; border: 1px solid #ccc; }
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
+<div class="layout">
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">LotTrack</div>
+    <div class="logo-sub">Warehouse Management</div>
+  </div>
+  <div class="sidebar-role">
+    <div class="role-dot"></div>
+    <div class="role-label">Owner Access</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <div class="nav-item active" onclick="showTab('overview')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Overview
+    </div>
+    <div class="nav-item" onclick="showTab('lots')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73L13 2.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      All Lots
+    </div>
+    <div class="nav-item" onclick="showTab('orders')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Orders
+      <span class="nav-badge" id="orderBadge">3</span>
+    </div>
+    <div class="nav-section-label">Management</div>
+    <div class="nav-item" onclick="showTab('shops')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Shop Owners
+    </div>
+    <div class="nav-item" onclick="showTab('staff')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Staff
+    </div>
+    <div class="nav-item" onclick="showTab('notifications')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Notifications
+      <span class="nav-badge" style="background:var(--blue)">5</span>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="avatar">RK</div>
+      <div>
+        <div class="user-name">Rajesh Kumar</div>
+        <div class="user-role">Warehouse Owner</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <header class="topbar">
+    <div class="flex gap-8">
+      <button class="hamburger" onclick="toggleSidebar()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="topbar-title" id="pageTitle">Overview</div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-primary" onclick="openModal('createLotModal')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Create Lot
+      </button>
+    </div>
+  </header>
+
+  <div class="page-content">
+
+    <!-- OVERVIEW TAB -->
+    <section class="tab-section active" id="tab-overview">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--accent-light)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73L13 2.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          </div>
+          <div class="stat-label">Total Lots</div>
+          <div class="stat-value" style="color:var(--accent)">24</div>
+          <div class="stat-sub">↑ 3 this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--blue-light)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+          </div>
+          <div class="stat-label">Dispatched</div>
+          <div class="stat-value" style="color:var(--blue)">8</div>
+          <div class="stat-sub">In transit</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--accent-light)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>
+          </div>
+          <div class="stat-label">Received</div>
+          <div class="stat-value" style="color:var(--accent)">13</div>
+          <div class="stat-sub">Delivered</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--orange-light)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div class="stat-label">Pending Orders</div>
+          <div class="stat-value" style="color:var(--orange)">3</div>
+          <div class="stat-sub">Need attention</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Recent Lots</div>
+          <button class="btn btn-outline btn-sm" onclick="showTab('lots')">View All</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Lot ID</th><th>Shop</th><th>Items</th><th>Status</th><th>Date</th><th>Action</th></tr>
+            </thead>
+            <tbody id="recentLotsTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Pending Orders</div>
+          <button class="btn btn-outline btn-sm" onclick="showTab('orders')">View All</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Order ID</th><th>Shop</th><th>Mobile</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="recentOrdersTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOTS TAB -->
+    <section class="tab-section" id="tab-lots">
+      <div class="flex-between mb-16">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm filter-btn active" data-filter="all" onclick="filterLots('all',this)">All</button>
+          <button class="btn btn-outline btn-sm filter-btn" data-filter="PACKED" onclick="filterLots('PACKED',this)">Packed</button>
+          <button class="btn btn-outline btn-sm filter-btn" data-filter="DISPATCHED" onclick="filterLots('DISPATCHED',this)">Dispatched</button>
+          <button class="btn btn-outline btn-sm filter-btn" data-filter="RECEIVED" onclick="filterLots('RECEIVED',this)">Received</button>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('createLotModal')">+ New Lot</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Lot ID</th><th>Shop</th><th>Items</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+            <tbody id="allLotsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ORDERS TAB -->
+    <section class="tab-section" id="tab-orders">
+      <div class="flex-between mb-16">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm order-filter active" data-filter="all" onclick="filterOrders('all',this)">All Orders</button>
+          <button class="btn btn-outline btn-sm order-filter" data-filter="pending" onclick="filterOrders('pending',this)">Pending</button>
+          <button class="btn btn-outline btn-sm order-filter" data-filter="acknowledged" onclick="filterOrders('acknowledged',this)">Acknowledged</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Order ID</th><th>Shop Owner</th><th>Mobile</th><th>Address</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="ordersTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SHOPS TAB -->
+    <section class="tab-section" id="tab-shops">
+      <div class="flex-between mb-16">
+        <div class="card-title">Registered Shop Owners</div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('addShopModal')">+ Add Shop</button>
+      </div>
+      <div class="shop-grid" id="shopGrid"></div>
+    </section>
+
+    <!-- STAFF TAB -->
+    <section class="tab-section" id="tab-staff">
+      <div class="flex-between mb-16">
+        <div class="card-title">Warehouse Staff</div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('addStaffModal')">+ Add Staff</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="staffTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOTIFICATIONS TAB -->
+    <section class="tab-section" id="tab-notifications">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">All Notifications</div>
+          <button class="btn btn-outline btn-sm" onclick="clearNotifs()">Mark All Read</button>
+        </div>
+        <div class="card-body">
+          <div id="notifList"></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- CREATE LOT MODAL -->
+<div class="overlay" id="createLotModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">Create New Lot</div>
+      <button class="modal-close" onclick="closeModal('createLotModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Destination Shop *</label>
+          <select class="form-select" id="lotShopSelect">
+            <option value="">Select shop...</option>
+            <option>Sharma General Store</option>
+            <option>Patel Retail Hub</option>
+            <option>Verma & Sons</option>
+            <option>Gupta Traders</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assign To Staff</label>
+          <select class="form-select" id="lotStaffSelect">
+            <option value="">Select staff...</option>
+            <option>Amit Singh</option>
+            <option>Priya Nair</option>
+            <option>Ramesh Yadav</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes / Instructions</label>
+        <textarea class="form-textarea" id="lotNotes" placeholder="Any packing or delivery instructions..."></textarea>
+      </div>
+      <div class="divider"></div>
+      <div class="flex-between mb-16">
+        <div style="font-size:14px;font-weight:600">Items in this Lot</div>
+        <button class="btn btn-outline btn-sm" onclick="addItemRow()">+ Add Item</button>
+      </div>
+      <div class="items-list" id="itemsList">
+        <div class="item-row" data-item="0">
+          <input class="form-input" style="flex:1" placeholder="Item name" value="Basmati Rice 5kg">
+          <input class="item-qty" type="number" value="10" min="1" placeholder="Qty">
+          <select class="form-select" style="width:80px;padding:5px 6px;font-size:12px">
+            <option>pcs</option><option>kg</option><option>box</option><option>ltr</option>
+          </select>
+          <button class="item-remove" onclick="removeItemRow(this)">×</button>
+        </div>
+        <div class="item-row" data-item="1">
+          <input class="form-input" style="flex:1" placeholder="Item name" value="Sunflower Oil 1L">
+          <input class="item-qty" type="number" value="6" min="1" placeholder="Qty">
+          <select class="form-select" style="width:80px;padding:5px 6px;font-size:12px">
+            <option>pcs</option><option>kg</option><option>box</option><option selected>ltr</option>
+          </select>
+          <button class="item-remove" onclick="removeItemRow(this)">×</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('createLotModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createLot()">Create Lot & Generate QR</button>
+    </div>
+  </div>
+</div>
+
+<!-- QR VIEW MODAL -->
+<div class="overlay" id="qrModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="qrModalTitle">Lot QR Code</div>
+        <div class="text-sm" id="qrModalSub">Scan to view lot details</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('qrModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="qr-box">
+        <canvas id="qrCanvas"></canvas>
+        <div style="margin-top:12px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text2)" id="qrLotIdLabel"></div>
+      </div>
+      <div class="lot-info-grid" id="qrInfoGrid"></div>
+      <div class="divider"></div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Items</div>
+      <div id="qrItemsDisplay"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('qrModal')">Close</button>
+      <button class="btn btn-primary" onclick="printQR()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print QR
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- LOT DETAIL MODAL -->
+<div class="overlay" id="lotDetailModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="ldTitle">Lot Details</div>
+        <div class="text-sm" id="ldSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('lotDetailModal')">×</button>
+    </div>
+    <div class="modal-body" id="lotDetailBody"></div>
+    <div class="modal-footer" id="lotDetailFooter"></div>
+  </div>
+</div>
+
+<!-- ORDER DETAIL MODAL -->
+<div class="overlay" id="orderDetailModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="odTitle">Order Details</div>
+      <button class="modal-close" onclick="closeModal('orderDetailModal')">×</button>
+    </div>
+    <div class="modal-body" id="orderDetailBody"></div>
+    <div class="modal-footer" id="orderDetailFooter"></div>
+  </div>
+</div>
+
+<!-- ADD SHOP MODAL -->
+<div class="overlay" id="addShopModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Shop Owner</div>
+      <button class="modal-close" onclick="closeModal('addShopModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Shop Name *</label><input class="form-input" id="shopName" placeholder="e.g. Sharma General Store"></div>
+      <div class="form-group"><label class="form-label">Owner Name *</label><input class="form-input" id="shopOwner" placeholder="Full name"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Email *</label><input class="form-input" id="shopEmail" type="email" placeholder="email@example.com"></div>
+        <div class="form-group"><label class="form-label">Mobile *</label><input class="form-input" id="shopMobile" type="tel" placeholder="+91 XXXXX XXXXX"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Address</label><textarea class="form-textarea" id="shopAddress" placeholder="Shop address..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('addShopModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addShop()">Add Shop Owner</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD STAFF MODAL -->
+<div class="overlay" id="addStaffModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Warehouse Staff</div>
+      <button class="modal-close" onclick="closeModal('addStaffModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Full Name *</label><input class="form-input" id="staffName" placeholder="Full name"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Email *</label><input class="form-input" id="staffEmail" type="email" placeholder="email@example.com"></div>
+        <div class="form-group"><label class="form-label">Mobile *</label><input class="form-input" id="staffMobile" type="tel" placeholder="+91 XXXXX XXXXX"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Role</label>
+        <select class="form-select" id="staffRole">
+          <option>Packer</option><option>Dispatcher</option><option>Supervisor</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Temporary Password *</label><input class="form-input" id="staffPass" type="password" placeholder="Set initial password"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('addStaffModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addStaff()">Add Staff Member</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =================== DATA ===================
+let lots = [
+  { id:'LOT-2024-001', shop:'Sharma General Store', status:'RECEIVED', created:'2025-07-01', dispatched:'2025-07-02', received:'2025-07-03', items:[{name:'Basmati Rice 5kg',qty:10,unit:'pcs'},{name:'Sugar 1kg',qty:20,unit:'pcs'}], notes:'Handle with care' },
+  { id:'LOT-2024-002', shop:'Patel Retail Hub', status:'DISPATCHED', created:'2025-07-03', dispatched:'2025-07-04', received:null, items:[{name:'Sunflower Oil 1L',qty:12,unit:'pcs'},{name:'Wheat Flour 10kg',qty:5,unit:'pcs'}], notes:'' },
+  { id:'LOT-2024-003', shop:'Verma & Sons', status:'PACKED', created:'2025-07-05', dispatched:null, received:null, items:[{name:'Dal Chana 500g',qty:30,unit:'pcs'}], notes:'Pack tightly' },
+  { id:'LOT-2024-004', shop:'Gupta Traders', status:'DISPATCHED', created:'2025-07-04', dispatched:'2025-07-05', received:null, items:[{name:'Refined Oil 5L',qty:8,unit:'pcs'},{name:'Salt 1kg',qty:25,unit:'pcs'},{name:'Tea 250g',qty:15,unit:'pcs'}], notes:'' },
+  { id:'LOT-2024-005', shop:'Sharma General Store', status:'RECEIVED', created:'2025-06-28', dispatched:'2025-06-29', received:'2025-06-30', items:[{name:'Biscuits Assorted',qty:40,unit:'pcs'}], notes:'' },
+];
+
+let orders = [
+  { id:'ORD-001', shop:'Sharma General Store', mobile:'+91 98765 43210', address:'12 MG Road, Indore', desc:'Need 20 pcs Rice 5kg, 10 pcs Dal, 5 pcs Oil', date:'2025-07-05', status:'pending' },
+  { id:'ORD-002', shop:'Patel Retail Hub', mobile:'+91 87654 32109', address:'45 Nehru Nagar, Bhopal', desc:'Require 15 boxes mixed spices and 8 pcs sugar bags', date:'2025-07-05', status:'pending' },
+  { id:'ORD-003', shop:'Verma & Sons', mobile:'+91 76543 21098', address:'7 Gandhi Chowk, Ujjain', desc:'Monthly stock: rice, wheat flour, cooking oil', date:'2025-07-04', status:'acknowledged' },
+  { id:'ORD-004', shop:'Gupta Traders', mobile:'+91 65432 10987', address:'23 Civil Lines, Jabalpur', desc:'Urgent: 50 pcs salt, 20 pcs tea packets', date:'2025-07-03', status:'acknowledged' },
+];
+
+let shops = [
+  { id:1, name:'Sharma General Store', owner:'Ravi Sharma', mobile:'+91 98765 43210', email:'ravi@sharma.com', address:'12 MG Road, Indore', lots:5 },
+  { id:2, name:'Patel Retail Hub', owner:'Suresh Patel', mobile:'+91 87654 32109', email:'suresh@patel.com', address:'45 Nehru Nagar, Bhopal', lots:3 },
+  { id:3, name:'Verma & Sons', owner:'Mohan Verma', mobile:'+91 76543 21098', email:'mohan@verma.com', address:'7 Gandhi Chowk, Ujjain', lots:2 },
+  { id:4, name:'Gupta Traders', owner:'Rakesh Gupta', mobile:'+91 65432 10987', email:'rakesh@gupta.com', address:'23 Civil Lines, Jabalpur', lots:4 },
+];
+
+let staff = [
+  { id:1, name:'Amit Singh', email:'amit@warehouse.com', mobile:'+91 91234 56789', role:'Packer', status:'active' },
+  { id:2, name:'Priya Nair', email:'priya@warehouse.com', mobile:'+91 80123 45678', role:'Dispatcher', status:'active' },
+  { id:3, name:'Ramesh Yadav', email:'ramesh@warehouse.com', mobile:'+91 70987 65432', role:'Supervisor', status:'inactive' },
+];
+
+let notifications = [
+  { id:1, type:'received', text:'LOT-2024-001 confirmed received by Sharma General Store', time:'2 hours ago', read:false },
+  { id:2, type:'order', text:'New order ORD-001 placed by Sharma General Store', time:'3 hours ago', read:false },
+  { id:3, type:'order', text:'New order ORD-002 placed by Patel Retail Hub', time:'4 hours ago', read:false },
+  { id:4, type:'dispatched', text:'LOT-2024-004 marked as dispatched to Gupta Traders', time:'Yesterday', read:true },
+  { id:5, type:'order', text:'New order ORD-003 placed by Verma & Sons', time:'Yesterday', read:true },
+];
+
+let itemCounter = 2;
+let currentFilter = 'all';
+let currentOrderFilter = 'all';
+
+// =================== INIT ===================
+function init() {
+  renderRecentLots();
+  renderRecentOrders();
+  renderAllLots();
+  renderOrders();
+  renderShops();
+  renderStaff();
+  renderNotifications();
+}
+
+// =================== SIDEBAR ===================
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarBackdrop').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('show');
+}
+
+// =================== TABS ===================
+const tabTitles = { overview:'Overview', lots:'All Lots', orders:'Orders', shops:'Shop Owners', staff:'Staff', notifications:'Notifications' };
+function showTab(tab) {
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + tab + "'")) n.classList.add('active');
+  });
+  document.getElementById('pageTitle').textContent = tabTitles[tab] || tab;
+  closeSidebar();
+}
+
+// =================== MODALS ===================
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', function(e) { if(e.target === this) this.classList.remove('show'); }));
+
+// =================== TOAST ===================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// =================== RENDER ===================
+function statusBadge(status) {
+  const cls = { PACKED:'badge-packed', DISPATCHED:'badge-dispatched', RECEIVED:'badge-received' };
+  return `<span class="badge ${cls[status]||''}">${status}</span>`;
+}
+
+function renderRecentLots() {
+  const tbody = document.getElementById('recentLotsTable');
+  const recent = [...lots].slice(-5).reverse();
+  tbody.innerHTML = recent.map(l => `
+    <tr>
+      <td><span class="lot-id">${l.id}</span></td>
+      <td>${l.shop}</td>
+      <td>${l.items.length} item${l.items.length>1?'s':''}</td>
+      <td>${statusBadge(l.status)}</td>
+      <td>${l.created}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-outline btn-sm" onclick="viewQR('${l.id}')">QR</button>
+          <button class="btn btn-outline btn-sm" onclick="viewLotDetail('${l.id}')">View</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function renderRecentOrders() {
+  const tbody = document.getElementById('recentOrdersTable');
+  const pending = orders.filter(o => o.status === 'pending').slice(0,3);
+  if (!pending.length) { tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No pending orders</td></tr>`; return; }
+  tbody.innerHTML = pending.map(o => `
+    <tr>
+      <td><span class="lot-id">${o.id}</span></td>
+      <td>${o.shop}</td>
+      <td>${o.mobile}</td>
+      <td>${o.date}</td>
+      <td>${statusBadge2(o.status)}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="viewOrder('${o.id}')">Review</button></td>
+    </tr>`).join('');
+}
+
+function statusBadge2(s) {
+  if(s==='pending') return `<span class="badge badge-pending">PENDING</span>`;
+  return `<span class="badge badge-received">ACKNOWLEDGED</span>`;
+}
+
+function renderAllLots() {
+  const tbody = document.getElementById('allLotsTable');
+  const filtered = currentFilter === 'all' ? lots : lots.filter(l => l.status === currentFilter);
+  if (!filtered.length) { tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><p>No lots found</p></div></td></tr>`; return; }
+  tbody.innerHTML = filtered.map(l => `
+    <tr>
+      <td><span class="lot-id">${l.id}</span></td>
+      <td>${l.shop}</td>
+      <td>${l.items.map(i => `${i.name} ×${i.qty}`).join(', ')}</td>
+      <td>${statusBadge(l.status)}</td>
+      <td>${l.created}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-outline btn-sm" onclick="viewQR('${l.id}')">QR</button>
+          <button class="btn btn-outline btn-sm" onclick="viewLotDetail('${l.id}')">Detail</button>
+          ${l.status==='PACKED'?`<button class="btn btn-primary btn-sm" onclick="dispatchLot('${l.id}')">Dispatch</button>`:''}
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function renderOrders() {
+  const tbody = document.getElementById('ordersTable');
+  const filtered = currentOrderFilter === 'all' ? orders : orders.filter(o => o.status === currentOrderFilter);
+  tbody.innerHTML = filtered.map(o => `
+    <tr>
+      <td><span class="lot-id">${o.id}</span></td>
+      <td>${o.shop}</td>
+      <td>${o.mobile}</td>
+      <td style="max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.address}</td>
+      <td>${o.date}</td>
+      <td>${statusBadge2(o.status)}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-outline btn-sm" onclick="viewOrder('${o.id}')">View</button>
+          ${o.status==='pending'?`<button class="btn btn-primary btn-sm" onclick="acknowledgeOrder('${o.id}')">Acknowledge</button>`:''}
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function renderShops() {
+  const grid = document.getElementById('shopGrid');
+  grid.innerHTML = shops.map(s => `
+    <div class="shop-card">
+      <div class="shop-card-header">
+        <div class="shop-avatar">${s.name.charAt(0)}</div>
+        <div>
+          <div class="shop-name">${s.name}</div>
+          <div class="shop-contact">${s.owner}</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text3);line-height:1.6">
+        <div>📞 ${s.mobile}</div>
+        <div>✉️ ${s.email}</div>
+        <div>📍 ${s.address}</div>
+      </div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <span class="text-sm">${s.lots} lots dispatched</span>
+        <button class="btn btn-danger btn-sm" onclick="removeShop(${s.id})">Remove</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderStaff() {
+  const tbody = document.getElementById('staffTable');
+  tbody.innerHTML = staff.map(s => `
+    <tr>
+      <td><div class="flex gap-8"><div class="avatar" style="width:32px;height:32px;font-size:12px">${s.name.split(' ').map(n=>n[0]).join('')}</div>${s.name}</div></td>
+      <td>${s.email}</td>
+      <td>${s.mobile}</td>
+      <td>${s.role}</td>
+      <td><span class="badge ${s.status==='active'?'badge-received':'badge-packed'}">${s.status.toUpperCase()}</span></td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-outline btn-sm" onclick="toggleStaffStatus(${s.id})">${s.status==='active'?'Deactivate':'Activate'}</button>
+          <button class="btn btn-danger btn-sm" onclick="removeStaff(${s.id})">Remove</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function renderNotifications() {
+  const list = document.getElementById('notifList');
+  const colors = { received:'var(--accent)', order:'var(--orange)', dispatched:'var(--blue)' };
+  list.innerHTML = notifications.map(n => `
+    <div class="notif-item" style="${n.read?'opacity:0.5':''}">
+      <div class="notif-dot" style="background:${colors[n.type]||'var(--text3)'}"></div>
+      <div class="notif-content">
+        <div class="notif-text">${n.text}</div>
+        <div class="notif-time">${n.time}</div>
+      </div>
+      ${!n.read?`<span class="badge badge-dispatched" style="flex-shrink:0">New</span>`:''}
+    </div>`).join('');
+}
+
+// =================== ACTIONS ===================
+function filterLots(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAllLots();
+}
+
+function filterOrders(filter, btn) {
+  currentOrderFilter = filter;
+  document.querySelectorAll('.order-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderOrders();
+}
+
+function addItemRow() {
+  const list = document.getElementById('itemsList');
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.setAttribute('data-item', itemCounter++);
+  row.innerHTML = `
+    <input class="form-input" style="flex:1" placeholder="Item name">
+    <input class="item-qty" type="number" value="1" min="1" placeholder="Qty">
+    <select class="form-select" style="width:80px;padding:5px 6px;font-size:12px">
+      <option>pcs</option><option>kg</option><option>box</option><option>ltr</option>
+    </select>
+    <button class="item-remove" onclick="removeItemRow(this)">×</button>`;
+  list.appendChild(row);
+}
+
+function removeItemRow(btn) {
+  const rows = document.querySelectorAll('#itemsList .item-row');
+  if (rows.length <= 1) { showToast('At least one item required'); return; }
+  btn.closest('.item-row').remove();
+}
+
+function createLot() {
+  const shop = document.getElementById('lotShopSelect').value;
+  if (!shop) { showToast('Please select a destination shop'); return; }
+  const rows = document.querySelectorAll('#itemsList .item-row');
+  const items = [];
+  rows.forEach(row => {
+    const name = row.querySelector('input[type="text"], input:not([type])').value.trim();
+    const qty = parseInt(row.querySelector('.item-qty').value) || 1;
+    const unit = row.querySelector('select').value;
+    if (name) items.push({ name, qty, unit });
+  });
+  if (!items.length) { showToast('Please add at least one item'); return; }
+  const newLot = {
+    id: 'LOT-2024-00' + (lots.length + 1),
+    shop, status: 'PACKED',
+    created: new Date().toISOString().split('T')[0],
+    dispatched: null, received: null,
+    items, notes: document.getElementById('lotNotes').value
+  };
+  lots.push(newLot);
+  closeModal('createLotModal');
+  renderAllLots(); renderRecentLots();
+  showToast(`✅ ${newLot.id} created successfully!`);
+  setTimeout(() => viewQR(newLot.id), 400);
+}
+
+function viewQR(lotId) {
+  const lot = lots.find(l => l.id === lotId);
+  if (!lot) return;
+  document.getElementById('qrModalTitle').textContent = lot.id;
+  document.getElementById('qrModalSub').textContent = `Destination: ${lot.shop}`;
+  document.getElementById('qrLotIdLabel').textContent = lot.id;
+  const qrData = `${window.location.origin}/lot/${lot.id}`;
+  const canvas = document.getElementById('qrCanvas');
+  QRCode.toCanvas(canvas, qrData, { width: 200, margin: 2, color: { dark: '#1A1814', light: '#FFFFFF' } });
+  document.getElementById('qrInfoGrid').innerHTML = `
+    <div class="info-item"><div class="info-item-label">Status</div><div class="info-item-value">${lot.status}</div></div>
+    <div class="info-item"><div class="info-item-label">Shop</div><div class="info-item-value">${lot.shop}</div></div>
+    <div class="info-item"><div class="info-item-label">Created</div><div class="info-item-value">${lot.created}</div></div>
+    <div class="info-item"><div class="info-item-label">Dispatched</div><div class="info-item-value">${lot.dispatched||'—'}</div></div>`;
+  document.getElementById('qrItemsDisplay').innerHTML = lot.items.map(i => `
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">
+      <span>${i.name}</span><span class="fw-600">×${i.qty} ${i.unit}</span>
+    </div>`).join('');
+  openModal('qrModal');
+}
+
+function viewLotDetail(lotId) {
+  const lot = lots.find(l => l.id === lotId);
+  if (!lot) return;
+  document.getElementById('ldTitle').textContent = lot.id;
+  document.getElementById('ldSub').textContent = `${lot.shop} • ${lot.status}`;
+  document.getElementById('lotDetailBody').innerHTML = `
+    <div class="lot-info-grid" style="margin-bottom:16px">
+      <div class="info-item"><div class="info-item-label">Status</div><div class="info-item-value">${statusBadge(lot.status)}</div></div>
+      <div class="info-item"><div class="info-item-label">Destination</div><div class="info-item-value">${lot.shop}</div></div>
+      <div class="info-item"><div class="info-item-label">Created</div><div class="info-item-value">${lot.created}</div></div>
+      <div class="info-item"><div class="info-item-label">Dispatched</div><div class="info-item-value">${lot.dispatched||'—'}</div></div>
+      <div class="info-item"><div class="info-item-label">Received</div><div class="info-item-value">${lot.received||'—'}</div></div>
+      ${lot.notes?`<div class="info-item" style="grid-column:1/-1"><div class="info-item-label">Notes</div><div class="info-item-value">${lot.notes}</div></div>`:''}
+    </div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:10px">Items (${lot.items.length})</div>
+    <div class="items-list">${lot.items.map(i=>`
+      <div class="item-row">
+        <div class="item-name">${i.name}</div>
+        <span class="badge badge-packed">×${i.qty} ${i.unit}</span>
+      </div>`).join('')}
+    </div>`;
+  const footer = document.getElementById('lotDetailFooter');
+  footer.innerHTML = `<button class="btn btn-outline" onclick="closeModal('lotDetailModal')">Close</button>
+    <button class="btn btn-outline" onclick="closeModal('lotDetailModal');viewQR('${lot.id}')">View QR</button>
+    ${lot.status==='PACKED'?`<button class="btn btn-primary" onclick="closeModal('lotDetailModal');dispatchLot('${lot.id}')">Mark Dispatched</button>`:''}`;
+  openModal('lotDetailModal');
+}
+
+function dispatchLot(lotId) {
+  const lot = lots.find(l => l.id === lotId);
+  if (!lot) return;
+  lot.status = 'DISPATCHED';
+  lot.dispatched = new Date().toISOString().split('T')[0];
+  renderAllLots(); renderRecentLots();
+  showToast(`📦 ${lot.id} marked as dispatched! Email sent to ${lot.shop}.`);
+}
+
+function viewOrder(orderId) {
+  const order = orders.find(o => o.id === orderId);
+  if (!order) return;
+  document.getElementById('odTitle').textContent = order.id;
+  document.getElementById('orderDetailBody').innerHTML = `
+    <div class="order-detail-row"><div class="order-detail-label">Shop</div><div class="order-detail-value fw-600">${order.shop}</div></div>
+    <div class="order-detail-row"><div class="order-detail-label">Mobile</div><div class="order-detail-value">${order.mobile}</div></div>
+    <div class="order-detail-row"><div class="order-detail-label">Address</div><div class="order-detail-value">${order.address}</div></div>
+    <div class="order-detail-row"><div class="order-detail-label">Date</div><div class="order-detail-value">${order.date}</div></div>
+    <div class="order-detail-row"><div class="order-detail-label">Status</div><div class="order-detail-value">${statusBadge2(order.status)}</div></div>
+    <div class="order-detail-row"><div class="order-detail-label">Description</div><div class="order-detail-value">${order.desc}</div></div>`;
+  const footer = document.getElementById('orderDetailFooter');
+  footer.innerHTML = `<button class="btn btn-outline" onclick="closeModal('orderDetailModal')">Close</button>
+    ${order.status==='pending'?`<button class="btn btn-primary" onclick="closeModal('orderDetailModal');acknowledgeOrder('${order.id}')">Acknowledge Order</button>`:'<button class="btn btn-primary" onclick="closeModal(\'orderDetailModal\');showTab(\'lots\');openModal(\'createLotModal\')">Create Lot for Order</button>'}`;
+  openModal('orderDetailModal');
+}
+
+function acknowledgeOrder(orderId) {
+  const order = orders.find(o => o.id === orderId);
+  if (!order) return;
+  order.status = 'acknowledged';
+  const badge = document.getElementById('orderBadge');
+  const pending = orders.filter(o => o.status==='pending').length;
+  badge.textContent = pending;
+  renderOrders(); renderRecentOrders();
+  showToast(`✅ ${orderId} acknowledged! Notification sent to ${order.shop}.`);
+}
+
+function addShop() {
+  const name = document.getElementById('shopName').value.trim();
+  const owner = document.getElementById('shopOwner').value.trim();
+  const email = document.getElementById('shopEmail').value.trim();
+  const mobile = document.getElementById('shopMobile').value.trim();
+  if (!name || !owner || !email || !mobile) { showToast('Please fill all required fields'); return; }
+  shops.push({ id: shops.length+1, name, owner, mobile, email, address: document.getElementById('shopAddress').value.trim() || '—', lots:0 });
+  closeModal('addShopModal');
+  renderShops();
+  showToast(`✅ ${name} added successfully!`);
+  ['shopName','shopOwner','shopEmail','shopMobile','shopAddress'].forEach(id => document.getElementById(id).value = '');
+}
+
+function removeShop(id) {
+  shops = shops.filter(s => s.id !== id);
+  renderShops();
+  showToast('Shop owner removed.');
+}
+
+function addStaff() {
+  const name = document.getElementById('staffName').value.trim();
+  const email = document.getElementById('staffEmail').value.trim();
+  const mobile = document.getElementById('staffMobile').value.trim();
+  if (!name || !email || !mobile) { showToast('Please fill all required fields'); return; }
+  staff.push({ id: staff.length+1, name, email, mobile, role: document.getElementById('staffRole').value, status:'active' });
+  closeModal('addStaffModal');
+  renderStaff();
+  showToast(`✅ ${name} added as staff!`);
+  ['staffName','staffEmail','staffMobile','staffPass'].forEach(id => document.getElementById(id).value = '');
+}
+
+function removeStaff(id) {
+  staff = staff.filter(s => s.id !== id);
+  renderStaff();
+  showToast('Staff member removed.');
+}
+
+function toggleStaffStatus(id) {
+  const s = staff.find(s => s.id === id);
+  if (!s) return;
+  s.status = s.status === 'active' ? 'inactive' : 'active';
+  renderStaff();
+  showToast(`${s.name} status updated to ${s.status}.`);
+}
+
+function clearNotifs() {
+  notifications.forEach(n => n.read = true);
+  renderNotifications();
+  showToast('All notifications marked as read.');
+}
+
+function printQR() { window.print(); }
+
+init();
+</script>
+</body>
+</html>

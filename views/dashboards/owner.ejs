@@ -1,0 +1,166 @@
+<%- include('../partials/header') %>
+<%- include('../partials/sidebar', { activePage: 'dashboard' }) %>
+
+<main class="main">
+  <header class="topbar">
+    <div class="flex gap-8">
+      <div class="topbar-title">Owner Overview</div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-primary" onclick="openModal('createLotModal')">
+        <i class="fas fa-plus"></i> New Lot
+      </button>
+    </div>
+  </header>
+
+  <div class="page-content">
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:var(--accent-light)">
+          <i class="fas fa-boxes-stacked" style="color:var(--accent)"></i>
+        </div>
+        <div class="stat-label">Total Lots</div>
+        <div class="stat-value" style="color:var(--accent)"><%= stats.totalLots %></div>
+        <div class="stat-sub">Across system</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon" style="background:var(--orange-light)">
+          <i class="fas fa-clock-rotate-left" style="color:var(--orange)"></i>
+        </div>
+        <div class="stat-label">Pending</div>
+        <div class="stat-value" style="color:var(--orange)"><%= stats.pendingOrders %></div>
+        <div class="stat-sub">Orders</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background:var(--blue-light)">
+          <i class="fas fa-users-viewfinder" style="color:var(--blue)"></i>
+        </div>
+        <div class="stat-label">Staff Members</div>
+        <div class="stat-value" style="color:var(--blue)"><%= stats.staffCount %></div>
+        <div class="stat-sub">Active personnel</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background:var(--accent-light)">
+          <i class="fas fa-certificate" style="color:var(--accent)"></i>
+        </div>
+        <div class="stat-label">Completed</div>
+        <div class="stat-value" style="color:var(--accent)"><%= stats.completedLots %></div>
+        <div class="stat-sub">Lots delivered</div>
+      </div>
+    </div>
+
+    <!-- RECENT ACTIVITY -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Lot Activity</div>
+        <a href="/lots" class="btn btn-outline btn-sm">Full History</a>
+      </div>
+      
+      <!-- DESKTOP TABLE -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Lot ID</th>
+              <th>Destination</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% recentLots.forEach(lot => { %>
+              <tr>
+                <td><span class="lot-id">#<%= lot.id.substring(0, 8) %></span></td>
+                <td class="fw-600"><%= lot.shop_name %></td>
+                <td><span class="badge badge-<%= lot.status.toLowerCase() %>"><%= lot.status %></span></td>
+                <td class="text-sm"><%= new Date(lot.created_at).toLocaleDateString() %></td>
+                <td style="text-align: right;">
+                    <div class="action-btns" style="justify-content: flex-end;">
+                        <a href="/lots/view/<%= lot.id %>" class="btn btn-outline btn-sm">Details</a>
+                        <% if (lot.status === 'PACKED') { %>
+                            <button type="button" class="btn btn-sm" style="background:var(--accent); color:white;" onclick="confirmDispatch('<%= lot.id %>')">Dispatch</button>
+                        <% } %>
+                    </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- MOBILE CARD LIST -->
+      <div class="mobile-card-list">
+        <% recentLots.forEach(lot => { %>
+          <div class="mobile-card">
+            <div class="mob-card-badge">
+                <span class="badge badge-<%= lot.status.toLowerCase() %>"><%= lot.status %></span>
+            </div>
+            <div class="mob-card-id">#<%= lot.id.substring(0, 10) %></div>
+            <div class="mob-card-subtitle">TO: <%= lot.shop_name %></div>
+            
+            <div class="mob-card-row">
+                <span class="mob-card-label">Created:</span>
+                <span class="mob-card-value"><%= new Date(lot.created_at).toLocaleDateString() %></span>
+            </div>
+
+            <div class="mob-card-actions">
+                <a href="/lots/view/<%= lot.id %>" class="btn btn-outline btn-sm" style="flex: 1; justify-content: center;">Details</a>
+                <% if (lot.status === 'PACKED') { %>
+                    <button type="button" class="btn btn-sm" style="flex: 1; background:var(--accent); color:white; justify-content: center;" onclick="confirmDispatch('<%= lot.id %>')">Dispatch</button>
+                <% } %>
+                <a href="/lot/<%= lot.id %>" target="_blank" class="btn btn-icon btn-sm"><i class="fas fa-qrcode"></i></a>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+
+      <% if (recentLots.length === 0) { %>
+        <div class="empty-state">
+            <i class="fas fa-box-open" style="font-size: 2rem; opacity: 0.2; display: block; margin-bottom: 1rem;"></i>
+            No shipment activity found.
+        </div>
+      <% } %>
+
+      <!-- PAGINATION -->
+      <div style="padding: 0 16px;">
+        <%- include('../partials/pagination') %>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- DISPATCH CONFIRMATION MODAL -->
+<div class="overlay" id="dispatchModal">
+    <div class="modal modal-sm">
+        <div class="modal-header">
+            <div class="modal-title">Confirm Dispatch</div>
+        </div>
+        <div class="modal-body">
+            <p>Ready to dispatch lot <strong id="dispatchLotIdLabel"></strong>?</p>
+            <p class="text-sm" style="margin-top: 8px; color: var(--accent);">This will notify the shop partner immediately.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeModal('dispatchModal')">Wait</button>
+            <form id="dispatchForm" method="POST">
+                <button type="submit" class="btn btn-primary">Yes, Dispatch Now</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDispatch(id) {
+    document.getElementById('dispatchLotIdLabel').textContent = '#' + id.substring(0, 8);
+    document.getElementById('dispatchForm').action = '/lots/dispatch/' + id;
+    openModal('dispatchModal');
+}
+</script>
+
+</div>
+</body>
+</html>
