@@ -18,18 +18,18 @@ router.post('/login', async (req, res) => {
         full_name: user.full_name,
         role: user.role
       };
-      return res.redirect('/');
+      return res.redirect('/?success=Welcome%20Back!%20Access%20Granted.');
     }
-    res.render('login', { error: 'Invalid email or password' });
+    res.redirect('/auth/login?error=Invalid%20Email%20or%20Password');
   } catch (err) {
     console.error(err);
-    res.render('login', { error: 'Internal Server Error' });
+    res.redirect('/auth/login?error=Internal%20Server%20Error');
   }
 });
 
 router.get('/logout', (req, res) => {
   req.session.destroy();
-  res.redirect('/auth/login');
+  res.redirect('/auth/login?success=Logged%20out%20successfully');
 });
 
 module.exports = router;

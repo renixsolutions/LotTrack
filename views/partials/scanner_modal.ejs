@@ -123,8 +123,8 @@ async function confirmReceipt(id) {
         if (response.ok) {
             showToast("Shipment Checked & Received!", "success");
             // Direct redirect to view the updated status
-            if (result.redirectUrl) {
-                setTimeout(() => window.location.href = result.redirectUrl, 800);
+            if (result.redirect) {
+                setTimeout(() => window.location.href = result.redirect, 800);
             }
         } else {
             showToast(result.error || result.message || "Action Forbidden", "error");

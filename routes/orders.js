@@ -45,10 +45,10 @@ router.post('/new', isLoggedIn, hasRole(['shop_owner']), async (req, res) => {
     // Notify owner
     notifyNewOrder(owner.email, shop.name);
 
-    res.redirect('/orders');
+    res.redirect('/orders?success=Order%20Placed%20Successfully');
   } catch (err) {
     console.error(err);
-    res.status(500).send('Order Placement Failed');
+    res.redirect('/orders/new?error=Order%20Placement%20Failed');
   }
 });
 
@@ -71,10 +71,10 @@ router.post('/update-status/:id', isLoggedIn, hasRole(['owner']), async (req, re
   const { status } = req.body;
   try {
     await db('orders').where('id', req.params.id).update({ status });
-    res.redirect('/orders/manage');
+    res.redirect('/orders/manage?success=Status%20Updated%20Successfully');
   } catch (err) {
     console.error(err);
-    res.status(500).send('Update Failed');
+    res.redirect('/orders/manage?error=Status%20Update%20Failed');
   }
 });
 

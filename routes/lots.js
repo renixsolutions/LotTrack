@@ -135,16 +135,15 @@ router.post('/dispatch/:id', isLoggedIn, hasRole(['owner', 'staff']), async (req
     // Send email to shop
     notifyDispatch(shop.email, lot.id);
     
-    res.redirect('/');
+    res.redirect(`/lots/view/${req.params.id}?success=Parcel%20Successfully%20Dispatched`);
   } catch (err) {
     console.error(err);
-    res.status(500).send('Update Failed');
+    res.redirect(`/lots/view/${req.params.id}?error=Dispatch%20Failed`);
   }
 });
 
-// Receive Lot
+// Confirm Receipt (Shop Owner via Scanner)
 router.post('/receive/:id', isLoggedIn, hasRole(['shop_owner']), async (req, res) => {
-  const { id } = req.params;
   try {
     const lot = await db('lots').where({ id }).first();
     
