@@ -64,7 +64,7 @@ router.get('/', isLoggedIn, async (req, res) => {
       const incomingLotsTotal = (await db('lots').where({ shop_id: user.id, status: 'DISPATCHED' }).count('id as count').first()).count;
       const totalPages = Math.ceil(incomingLotsTotal / limit);
 
-      const incomingLots = await db('lots')
+      const recentLots = await db('lots')
         .where({ shop_id: user.id, status: 'DISPATCHED' })
         .orderBy('dispatched_at', 'desc')
         .limit(limit)
@@ -75,9 +75,15 @@ router.get('/', isLoggedIn, async (req, res) => {
         .orderBy('received_at', 'desc')
         .limit(5);
 
+      const recentOrders = await db('orders')
+        .where('shop_id', user.id)
+        .orderBy('created_at', 'desc')
+        .limit(5);
+
       return res.render('dashboards/shop', { 
-        incomingLots, 
+        incomingLots: recentLots, 
         recentReceived, 
+        recentOrders,
         user,
         currentPage: page, 
         totalPages, 

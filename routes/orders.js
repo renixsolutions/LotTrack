@@ -45,7 +45,7 @@ router.post('/new', isLoggedIn, hasRole(['shop_owner']), async (req, res) => {
     // Notify owner
     notifyNewOrder(owner.email, shop.name);
 
-    res.redirect('/');
+    res.redirect('/orders');
   } catch (err) {
     console.error(err);
     res.status(500).send('Order Placement Failed');

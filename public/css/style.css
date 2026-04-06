@@ -210,22 +210,36 @@ tr:hover td { background: var(--surface2); }
 .brand-loader { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
 .brand-loader.show { opacity: 1; pointer-events: all; }
 
-/* SKELETON GHOST LAYOUT */
+/* FULL SHELL SKELETON GHOST LAYOUT */
 .skeleton-shroud { 
     display: none;
     position: fixed; inset: 0; background: var(--bg); z-index: 10000; 
-    padding: 24px; opacity: 0; pointer-events: none; transition: opacity 0.4s;
+    transition: opacity 0.4s;
     overflow: hidden;
 }
-.skeleton-shroud.show { display: block; opacity: 1; pointer-events: all; }
+.skeleton-shroud.show { display: flex; opacity: 1; pointer-events: all; }
 
+/* SIDEBAR GHOST */
+.skeleton-sidebar { 
+    width: 260px; height: 100vh; background: var(--surface); 
+    border-right: 1px solid var(--border); padding: 24px;
+    display: flex; flex-direction: column; gap: 20px;
+}
+.skeleton-side-item { height: 40px; background: var(--surface2); border-radius: 8px; position: relative; overflow: hidden; }
+
+/* MAIN CONTENT GHOST AREA */
+.skeleton-main { flex: 1; padding: 24px; position: relative; }
+.skeleton-header { height: 60px; width: 100%; position: absolute; top: 0; left: 0; background: var(--surface); border-bottom: 1px solid var(--border); }
 .skeleton-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; margin-top: 60px; }
 .skeleton-card { height: 120px; background: var(--surface); border-radius: var(--radius); position: relative; overflow: hidden; }
 .skeleton-row { height: 48px; background: var(--surface); border-radius: var(--radius-sm); margin-bottom: 12px; position: relative; overflow: hidden; }
-.skeleton-header { height: 60px; width: 100%; position: absolute; top: 0; left: 0; background: var(--surface); border-bottom: 1px solid var(--border); }
+
+/* MOBILE NAV GHOST */
+.skeleton-mob-nav { display: none; position: fixed; bottom: 0; width: 100%; height: 64px; background: var(--surface); border-top: 1px solid var(--border); padding: 12px 20px; gap: 20px; z-index: 10001; }
+.skeleton-nav-tab { flex: 1; height: 40px; background: var(--surface2); border-radius: 8px; position: relative; overflow: hidden; }
 
 /* SHIMMER EFFECT */
-.skeleton-card::after, .skeleton-row::after {
+.skeleton-side-item::after, .skeleton-card::after, .skeleton-row::after, .skeleton-nav-tab::after {
     content: ""; position: absolute; inset: 0;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
     transform: translateX(-100%);
@@ -234,8 +248,11 @@ tr:hover td { background: var(--surface2); }
 @keyframes shimmer { 100% { transform: translateX(100%); } }
 
 @media (max-width: 768px) {
+    .skeleton-sidebar { display: none; }
     .skeleton-grid { grid-template-columns: 1fr 1fr; margin-top: 80px; }
-    .skeleton-shroud { padding: 12px; }
+    .skeleton-shroud { padding: 0; }
+    .skeleton-main { padding: 12px; }
+    .skeleton-mob-nav { display: flex; }
 }
 
 body.loading .dashboard-layout { opacity: 0.5; pointer-events: none; transition: all 0.4s ease; }
