@@ -89,6 +89,10 @@ function hideLoader() {
 document.addEventListener('click', (e) => {
     const navItem = e.target.closest('.mob-nav-item, .nav-item, .btn');
     if (navItem && navItem.tagName === 'A' && !navItem.target) {
+        // Skip loader for functional links (like modal triggers)
+        if (navItem.getAttribute('href') && navItem.getAttribute('href').startsWith('javascript:')) {
+            return;
+        }
         showLoader();
     }
 });
