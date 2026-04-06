@@ -142,8 +142,19 @@ router.post('/dispatch/:id', isLoggedIn, hasRole(['owner', 'staff']), async (req
 router.post('/receive/:id', isLoggedIn, hasRole(['shop_owner']), async (req, res) => {
   const { id } = req.params;
   try {
-    const lot = await db('lots').where({ id, shop_id: req.session.user.id }).first();
-    if (!lot) return res.status(403).send('Unauthorized receipt');
+    const lot = await db('lots').where({ id }).first();
+    
+    if (!lot) return res.status(404).send('Parcel not found');
+    
+    // Check if assigned to this shop
+    if (lot.shop_id !== req.session.user.id) {
+      return res.status(403).send('Unauthorized: This parcel is not assigned to your shop.');
+    }
+
+    // Check status
+    if (lot.status !== 'DISPATCHED') {
+      return res.status(400).send(`Invalid Action: Parcel is already ${lot.status.toLowerCase()}`);
+    }
 
     const owner = await db('users').where('role', 'owner').first();
     const shop = req.session.user;

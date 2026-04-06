@@ -190,7 +190,19 @@ body.loading .dashboard-layout { opacity: 0.5; pointer-events: none; transition:
 body.loading .sidebar-backdrop { display: none !important; }
 
 @media (max-width: 480px) {
-  .modal { width: 100%; border-radius: 24px 24px 0 0; position: fixed; bottom: 0; max-height: 95vh; animation: slideInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .overlay .modal { 
+    width: 100%; 
+    border-radius: 24px 24px 0 0; 
+    position: fixed; 
+    bottom: 0; 
+    max-height: 95vh; 
+    animation: slideInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+  }
+  .modal:not(.overlay .modal) {
+    margin-top: 0 !important;
+    border-radius: var(--radius);
+    max-height: none;
+  }
   @keyframes slideInUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   .page-content { padding: 12px; }
   .stat-value { font-size: 22px; }
@@ -202,3 +214,17 @@ body.loading .sidebar-backdrop { display: none !important; }
 .page-btn:hover { border-color: var(--accent); color: var(--accent); }
 .page-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
 .page-btn.disabled { opacity: 0.5; pointer-events: none; }
+
+/* PRINT / PDF GENERATION CLEANUP */
+@media print {
+  .sidebar, .mobile-nav, .mobile-top-bar, .topbar, .page-loader, .sidebar-backdrop, .overlay, .loading-overlay { 
+    display: none !important; 
+  }
+  .main, .main-content, .page-content { 
+    margin: 0 !important; 
+    padding: 0 !important; 
+    width: 100% !important; 
+  }
+  body { background: white !important; }
+  .card, .stat-card { border: none !important; box-shadow: none !important; }
+}
