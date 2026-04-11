@@ -91,28 +91,56 @@ function hideLoader() {
     }
 }
 
-// Global Navigation/Form Loader Logic
-document.addEventListener('click', (e) => {
-    const navItem = e.target.closest('.mob-nav-item, .nav-item, .btn');
-    if (navItem && navItem.tagName === 'A' && !navItem.target) {
-        // Skip loader for functional links (like modal triggers)
-        if (navItem.getAttribute('href') && navItem.getAttribute('href').startsWith('javascript:')) {
-            return;
-        }
-        showLoader();
-    }
-});
-
 document.addEventListener('submit', (e) => {
     if (!e.defaultPrevented) {
         showLoader();
     }
 });
 
-// Handle success/error from URL params automatically
-window.onload = () => {
+// Handle success/error from URL params and hide loader
+const initPage = () => {
     const params = new URLSearchParams(window.location.search);
     if (params.has('success')) showToast(params.get('success'), 'success');
     if (params.has('error')) showToast(params.get('error'), 'error');
-    hideLoader(); // Ensure loader is hidden after load
+    hideLoader();
 };
+
+if (document.readyState === 'complete') {
+    initPage();
+} else {
+    window.addEventListener('load', initPage);
+    document.addEventListener('DOMContentLoaded', hideLoader);
+}
+
+// CRITICAL: Handle back/forward navigation cache (BFCache)
+window.addEventListener('pageshow', (event) => {
+    // If the page was loaded from cache (e.g. back button) or just shown, hide the loader immediately
+    hideLoader();
+});
+
+// Update navigation listener to be more selective
+document.addEventListener('click', (e) => {
+    const navLink = e.target.closest('a');
+    if (!navLink) return;
+
+    const href = navLink.getAttribute('href');
+    const target = navLink.getAttribute('target');
+    
+    // Conditions to skip loader:
+    // 1. New tab
+    // 2. Fragment link (#)
+    // 3. Javascript call
+    // 4. Download link (has download attribute or format=csv in query)
+    if (target === '_blank' || 
+        !href || 
+        href.startsWith('#') || 
+        href.startsWith('javascript:') || 
+        navLink.hasAttribute('download') ||
+        href.includes('format=csv')) {
+        return;
+    }
+
+    if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+        showLoader();
+    }
+});

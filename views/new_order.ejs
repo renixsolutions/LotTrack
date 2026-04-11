@@ -1,5 +1,5 @@
 <%- include('partials/header') %>
-<%- include('partials/sidebar', { activePage: 'orders' }) %>
+<%- include('partials/sidebar', { activePage: 'new_order' }) %>
 
 <main class="main">
   <div class="page-content" style="max-width: 800px; margin: 0 auto; width: 100%;">
@@ -9,7 +9,7 @@
     </header>
 
     <div class="card" style="padding: 2.5rem; box-shadow: var(--shadow-md);">
-      <form action="/orders/new" method="POST">
+      <form action="/orders/new" method="POST" enctype="multipart/form-data">
         <style>
           .form-group { margin-bottom: 20px; }
           .form-label { font-weight: 700; color: var(--text2); margin-bottom: 8px; display: block; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -31,6 +31,10 @@
         <div class="form-group">
           <label class="form-label">Order Description</label>
           <textarea name="description" class="form-control" rows="5" placeholder="List items and quantities needed (e.g. 10x Gold Chains, 5x Diamond Rings)" required></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Attach References (Max 5 Images)</label>
+          <input type="file" name="images" class="form-control" multiple accept="image/*" style="padding: 8px;">
         </div>
 
         <div style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem;">

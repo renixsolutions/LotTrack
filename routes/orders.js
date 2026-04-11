@@ -3,6 +3,7 @@ const router = express.Router();
 const { isLoggedIn, hasRole } = require('../middleware/auth');
 const db = require('../db');
 const { notifyNewOrder } = require('../services/email');
+const upload = require('../middleware/upload');
 
 // View My Orders (Shop Owner)
 router.get('/', isLoggedIn, hasRole(['shop_owner']), async (req, res) => {
@@ -28,8 +29,18 @@ router.get('/new', isLoggedIn, hasRole(['shop_owner']), async (req, res) => {
 });
 
 // Save Order
-router.post('/new', isLoggedIn, hasRole(['shop_owner']), async (req, res) => {
-  const { mobile, address, description } = req.body;
+router.post('/new', isLoggedIn, hasRole(['shop_owner']), (req, res, next) => {
+  upload.array('images', 5)(req, res, (err) => {
+    if (err) {
+      console.error('Upload Error:', err);
+      return res.redirect('/orders/new?error=' + encodeURIComponent(err.message));
+    }
+    next();
+  });
+}, async (req, res) => {
+  const { mobile, address, description } = req.body || {};
+  const images = req.files && req.files.length > 0 ? JSON.stringify(req.files.map(f => f.filename)) : null;
+
   try {
     const shop = req.session.user;
     const owner = await db('users').where('role', 'owner').first();
@@ -39,11 +50,12 @@ router.post('/new', isLoggedIn, hasRole(['shop_owner']), async (req, res) => {
       mobile,
       address,
       description,
-      status: 'PENDING'
+      status: 'PENDING',
+      images
     });
 
     // Notify owner
-    notifyNewOrder(owner.email, shop.name);
+    notifyNewOrder(owner.email, shop.full_name);
 
     res.redirect('/orders?success=Order%20Placed%20Successfully');
   } catch (err) {

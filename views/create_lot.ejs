@@ -14,7 +14,7 @@
         <div class="modal-title">New Dispatch Lot</div>
         <div class="text-sm">Pack and assign items to a shop.</div>
       </div>
-      <form action="/lots/create" method="POST">
+      <form action="/lots/create" method="POST" enctype="multipart/form-data">
         <div class="modal-body">
           <div class="form-row">
             <div class="form-group">
@@ -28,8 +28,14 @@
             </div>
             <div class="form-group">
               <label class="form-label">Logistics Lead</label>
-              <input type="text" class="form-input" value="<%= user.name %>" readonly style="background: var(--surface2);">
+              <input type="text" name="logistics_lead" class="form-input" value="<%= user.full_name %>" placeholder="Enter name...">
             </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Proof of Parcel (Optional Images - Max 5)</label>
+            <input type="file" name="images" class="form-input" multiple accept="image/*">
+            <div class="text-xs mt-4" style="color: var(--text3); font-size: 11px;">You can select up to 5 images for verification.</div>
           </div>
 
           <div class="divider"></div>

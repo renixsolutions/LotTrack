@@ -1,0 +1,137 @@
+<%- include('partials/header') %>
+<%- include('partials/sidebar', { activePage: 'reports' }) %>
+
+<main class="main">
+  <header class="topbar">
+    <div class="flex gap-8">
+      <div class="topbar-title">Reporting & Insights</div>
+    </div>
+    <div class="topbar-right">
+        <a href="<%= csvUrl %>" class="btn btn-outline" id="downloadBtn">
+            <i class="fas fa-file-csv"></i> Download CSV
+        </a>
+    </div>
+  </header>
+
+  <div class="page-content">
+    <!-- FILTERS CARD -->
+    <div class="card" style="margin-bottom: 24px; padding: 20px;">
+        <form action="/reports" method="GET" class="filter-form">
+            <style>
+                .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; align-items: flex-end; }
+                .filter-form .btn { height: 42px; width: 100%; justify-content: center; }
+            </style>
+            <div class="filter-grid">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Shop Partner</label>
+                    <select name="shop_id" class="form-input">
+                        <option value="">All Shops</option>
+                        <% shops.forEach(s => { %>
+                            <option value="<%= s.id %>" <%= filters.shop_id == s.id ? 'selected' : '' %>><%= s.full_name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" name="start_date" class="form-input" value="<%= filters.start_date %>">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">End Date</label>
+                    <input type="date" name="end_date" class="form-input" value="<%= filters.end_date %>">
+                </div>
+                <div class="form-group" style="margin-bottom: 0; display: flex; gap: 8px;">
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    <a href="/reports" class="btn btn-outline" style="width: 60px;"><i class="fas fa-undo"></i></a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: var(--accent-light);">
+                <i class="fas fa-chart-line" style="color: var(--accent);"></i>
+            </div>
+            <div class="stat-label">Results Found</div>
+            <div class="stat-value"><%= reports.length %></div>
+            <div class="stat-sub">Units matching filters</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background: var(--blue-light);">
+                <i class="fas fa-truck-paper" style="color: var(--blue);"></i>
+            </div>
+            <div class="stat-label">Active Transits</div>
+            <div class="stat-value"><%= reports.filter(r => r.status === 'DISPATCHED').length %></div>
+            <div class="stat-sub">Currently on road</div>
+        </div>
+    </div>
+
+    <!-- DATA TABLE -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Shipment Ledger</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tracking ID</th>
+              <th>Destination</th>
+              <th>Logistics Lead</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% reports.forEach(lot => { %>
+              <tr>
+                <td><span class="lot-id">#<%= lot.id.substring(0, 10).toUpperCase() %></span></td>
+                <td class="fw-600"><%= lot.shop_name %></td>
+                <td class="text-sm"><%= lot.logistics_lead || 'N/A' %></td>
+                <td><span class="badge badge-<%= lot.status.toLowerCase() %>"><%= lot.status %></span></td>
+                <td class="text-sm"><%= new Date(lot.created_at).toLocaleDateString() %></td>
+                <td style="text-align: right;">
+                    <a href="/lots/view/<%= lot.id %>" class="btn btn-outline btn-sm">Audit Details</a>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+      <% if (reports.length === 0) { %>
+        <div class="empty-state">No shipments found for the current filter criteria.</div>
+      <% } %>
+    </div>
+  </div>
+</main>
+
+<!-- DOWNLOAD SUCCESS MODAL -->
+<div class="overlay" id="downloadSuccessModal">
+    <div class="modal modal-sm" style="text-align: center;">
+        <div class="modal-body" style="padding: 40px 24px;">
+            <div class="stat-icon" style="background: var(--accent-light); margin: 0 auto 20px; width: 64px; height: 64px; border-radius: 50%;">
+                <i class="fas fa-file-export" style="color: var(--accent); font-size: 24px;"></i>
+            </div>
+            <h3 style="font-family: 'Syne', sans-serif; margin-bottom: 8px;">Export Complete!</h3>
+            <p style="color: var(--text3); font-size: 14px;">Your shipment ledger has been generated and the download has started.</p>
+        </div>
+        <div class="modal-footer" style="justify-content: center;">
+            <button class="btn btn-primary" onclick="closeModal('downloadSuccessModal')" style="width: 100%;">Got it</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('downloadBtn').addEventListener('click', function(e) {
+        // Show success modal after a short delay to simulate preparation
+        setTimeout(() => {
+            openModal('downloadSuccessModal');
+        }, 800);
+    });
+</script>
+
+</div>
+</body>
+</html>

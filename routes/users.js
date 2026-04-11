@@ -23,8 +23,8 @@ router.get('/', isLoggedIn, hasRole(['owner']), async (req, res) => {
     res.render('users', { 
         users, 
         user: req.session.user,
-        error: null, 
-        success: null, 
+        error: req.query.error || null, 
+        success: req.query.success || null, 
         currentPage: page, 
         totalPages, 
         activePage: 'users', 
@@ -66,6 +66,34 @@ router.post('/add', isLoggedIn, hasRole(['owner']), async (req, res) => {
   }
 });
 
+// Edit User
+router.post('/edit', isLoggedIn, hasRole(['owner']), async (req, res) => {
+  const { id, full_name, email, role, password } = req.body;
+  
+  try {
+    const updateData = {
+      full_name,
+      email,
+      role
+    };
+
+    if (password && password.trim() !== '') {
+      const salt = await bcrypt.genSalt(10);
+      updateData.password_hash = await bcrypt.hash(password, salt);
+    }
+
+    await db('users').where('id', id).update(updateData);
+
+    res.redirect('/users?success=User updated successfully');
+  } catch (err) {
+    console.error(err);
+    if (err.code === '23505') {
+       return res.redirect('/users?error=Email already in use');
+    }
+    res.redirect('/users?error=Update Failed');
+  }
+});
+
 // Delete User
 router.post('/delete/:id', isLoggedIn, hasRole(['owner']), async (req, res) => {
   try {
@@ -76,7 +104,10 @@ router.post('/delete/:id', isLoggedIn, hasRole(['owner']), async (req, res) => {
     res.redirect('/users?success=User deleted');
   } catch (err) {
     console.error(err);
-    res.status(500).send('Delete Failed');
+    if (err.code === '23503') {
+      return res.redirect('/users?error=Cannot delete user: They have active Shipments or Orders linked to their account.');
+    }
+    res.redirect('/users?error=Delete Failed');
   }
 });
 

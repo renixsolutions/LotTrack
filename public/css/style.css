@@ -330,28 +330,60 @@ body.loading .sidebar-backdrop { display: none !important; }
 
 /* PRINT / PDF GENERATION CLEANUP */
 @media print {
-  .sidebar, .mobile-nav, .mobile-top-bar, .topbar, .page-loader, .sidebar-backdrop, .overlay:not(.show), .loading-overlay, .btn, .modal-header, .modal-footer, .modal-close { 
-    display: none !important; 
+  /* Hide everything by default */
+  body * {
+    visibility: hidden !important;
   }
-  .overlay.show { position: static !important; background: none !important; }
-  .overlay.show .modal { 
-    box-shadow: none !important; 
-    border: none !important; 
-    width: 100% !important; 
-    max-width: none !important; 
-    margin: 0 !important; 
-    padding: 0 !important; 
+  
+  /* Only show the active overlay and its children */
+  .overlay.show, .overlay.show * {
+    visibility: visible !important;
   }
-  .print-area { 
-    display: block !important; 
-    visibility: visible !important; 
+  
+  /* Position the overlay to take up the full printed page */
+  .overlay.show {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    display: block !important;
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  
+  .overlay.show .modal {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+  
+  /* Hide UI elements within the modal that shouldn't be printed */
+  .modal-header, .modal-footer, .modal-close, .btn {
+    display: none !important;
+  }
+  
+  .print-area {
     width: 100% !important;
     text-align: center !important;
+    padding: 20px !important;
   }
-  .main, .main-content, .page-content { 
-    margin: 0 !important; 
-    padding: 0 !important; 
-    width: 100% !important; 
+  
+  .print-area img {
+    margin: 0 auto !important;
+    max-width: 100% !important;
   }
-  body { background: white !important; }
+
+  body { 
+    background: white !important; 
+  }
 }

@@ -47,11 +47,13 @@ const lotRoutes = require('./routes/lots');
 const orderRoutes = require('./routes/orders');
 const dashboardRoutes = require('./routes/dashboard');
 const usersRoutes = require('./routes/users');
+const reportRoutes = require('./routes/reports');
 
 app.use('/auth', authRoutes);
 app.use('/lots', lotRoutes);
 app.use('/orders', orderRoutes);
 app.use('/users', usersRoutes);
+app.use('/reports', reportRoutes);
 app.use('/', dashboardRoutes);
 
 const QRCode = require('qrcode');

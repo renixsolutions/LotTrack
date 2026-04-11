@@ -35,6 +35,15 @@
         </div>
         <div class="stat-sub">Updated <%= new Date(lot.updated_at || lot.created_at).toLocaleDateString() %></div>
       </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background:var(--orange-light)">
+            <i class="fas fa-user-tie" style="color:var(--orange)"></i>
+        </div>
+        <div class="stat-label">Logistics Lead</div>
+        <div class="stat-value" style="color:var(--orange); font-size: 16px;"><%= lot.logistics_lead || 'Not Assigned' %></div>
+        <div class="stat-sub">Operations Handler</div>
+      </div>
     </div>
 
     <!-- ITEM LIST -->
@@ -84,6 +93,33 @@
       <% } %>
     </div>
 
+    <!-- PROOFS SECTION -->
+    <% if (lot.images) { %>
+    <% 
+        let imageList = []; 
+        try { 
+            imageList = JSON.parse(lot.images); 
+        } catch(e) { 
+            // Fallback for legacy data that might be stored as a plain string
+            imageList = [lot.images]; 
+        } 
+    %>
+    <div class="card" style="margin-top: 24px;">
+        <div class="card-header">
+            <div class="card-title">Image Proofs (<%= imageList.length %>)</div>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px;">
+                <% imageList.forEach(img => { %>
+                    <a href="/uploads/<%= img %>" target="_blank" style="border-radius: 12px; overflow: hidden; border: 1px solid var(--border); aspect-ratio: 1; display: block;">
+                        <img src="/uploads/<%= img %>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseleave="this.style.transform='scale(1)'">
+                    </a>
+                <% }); %>
+            </div>
+        </div>
+    </div>
+    <% } %>
+
     <!-- ACTIONS (Owner/Staff Only) -->
     <% if (user.role === 'owner' || user.role === 'staff') { %>
     <div class="card" style="margin-top: 24px; padding: 24px; text-align: center;">
@@ -120,6 +156,7 @@
 
             <div style="font-family: monospace; font-size: 14px; font-weight: 800; color: var(--accent); margin-bottom: 4px;">#<%= lot.id.substring(0, 16) %></div>
             <div style="font-size: 13px; font-weight: 700;">TO: <%= shop.full_name %></div>
+            <div style="font-size: 12px; font-weight: 600; color: var(--text2); margin-top: 4px;">LEAD: <%= lot.logistics_lead || 'Team' %></div>
             <div style="font-size: 11px; color: var(--text3); margin-top: 4px;"><%= new Date(lot.created_at).toLocaleDateString() %></div>
         </div>
         <div class="modal-footer" style="justify-content: center;">

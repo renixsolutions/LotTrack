@@ -40,7 +40,7 @@
       <a href="/orders" class="nav-item <%= locals.activePage === 'orders' ? 'active' : '' %>">
         <i class="fas fa-clipboard-list"></i> Order History
       </a>
-      <a href="/orders/new" class="nav-item">
+      <a href="/orders/new" class="nav-item <%= locals.activePage === 'new_order' ? 'active' : '' %>">
         <i class="fas fa-cart-plus"></i> Place Order
       </a>
     <% } %>
@@ -53,7 +53,10 @@
       <a href="/orders/manage" class="nav-item <%= locals.activePage === 'orders' ? 'active' : '' %>">
         <i class="fas fa-clipboard-check"></i> Manage Orders
       </a>
-      <a href="/settings" class="nav-item">
+      <a href="/reports" class="nav-item <%= locals.activePage === 'reports' ? 'active' : '' %>">
+        <i class="fas fa-chart-pie"></i> Accounting & Reports
+      </a>
+      <a href="/settings" class="nav-item <%= locals.activePage === 'settings' ? 'active' : '' %>">
         <i class="fas fa-sliders"></i> Global Settings
       </a>
     <% } %>

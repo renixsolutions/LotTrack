@@ -5,6 +5,7 @@ const db = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const QRCode = require('qrcode');
 const { notifyDispatch, notifyReceipt } = require('../services/email');
+const upload = require('../middleware/upload');
 
 // All Lots List
 router.get('/', isLoggedIn, async (req, res) => {
@@ -13,13 +14,22 @@ router.get('/', isLoggedIn, async (req, res) => {
     const limit = 10;
     const offset = (page - 1) * limit;
 
-    const totalItems = (await db('lots').count('id as count').first()).count;
+    const totalItemsQuery = db('lots');
+    const lotsQuery = db('lots')
+      .join('users', 'lots.shop_id', 'users.id')
+      .select('lots.*', 'users.full_name as shop_name');
+
+    if (req.session.user.role === 'shop_owner') {
+      totalItemsQuery.where('lots.shop_id', req.session.user.id);
+      lotsQuery.where('lots.shop_id', req.session.user.id);
+    }
+
+    const totalItemsRow = await totalItemsQuery.count('lots.id as count').first();
+    const totalItems = totalItemsRow.count;
     const totalPages = Math.ceil(totalItems / limit);
 
-    const lots = await db('lots')
-      .join('users', 'lots.shop_id', 'users.id')
-      .select('lots.*', 'users.full_name as shop_name')
-      .orderBy('created_at', 'desc')
+    const lots = await lotsQuery
+      .orderBy('lots.created_at', 'desc')
       .limit(limit)
       .offset(offset);
       
@@ -85,17 +95,34 @@ router.get('/create', isLoggedIn, hasRole(['owner', 'staff']), async (req, res) 
 });
 
 // Save Lot
-router.post('/create', isLoggedIn, hasRole(['owner', 'staff']), async (req, res) => {
-  const { shop_id, item_names, quantities } = req.body;
+router.post('/create', isLoggedIn, hasRole(['owner', 'staff']), (req, res, next) => {
+  upload.array('images', 5)(req, res, (err) => {
+    if (err) {
+      console.error('Upload Error:', err);
+      return res.redirect('/lots/create?error=' + encodeURIComponent(err.message));
+    }
+    next();
+  });
+}, async (req, res) => {
+  const { shop_id, item_names, quantities, logistics_lead } = req.body || {};
   const lot_id = uuidv4();
   
+  if (!shop_id || shop_id === 'undefined') {
+    return res.redirect('/lots/create?error=Missing required fields');
+  }
+
+  // Extract filenames from uploaded files as an array
+  const images = req.files && req.files.length > 0 ? req.files.map(f => f.filename) : null;
+
   try {
     await db.transaction(async trx => {
       await trx('lots').insert({
         id: lot_id,
         shop_id,
         creator_id: req.session.user.id,
-        status: 'PACKED'
+        logistics_lead,
+        status: 'PACKED',
+        images: images ? JSON.stringify(images) : null // Keep stringify for safety across different DB types
       });
 
       const items = Array.isArray(item_names) ? item_names : [item_names];
@@ -144,6 +171,7 @@ router.post('/dispatch/:id', isLoggedIn, hasRole(['owner', 'staff']), async (req
 
 // Confirm Receipt (Shop Owner via Scanner)
 router.post('/receive/:id', isLoggedIn, hasRole(['shop_owner']), async (req, res) => {
+  const { id } = req.params;
   try {
     const lot = await db('lots').where({ id }).first();
     
@@ -170,7 +198,7 @@ router.post('/receive/:id', isLoggedIn, hasRole(['shop_owner']), async (req, res
       });
     
     // Notify owner
-    notifyReceipt(owner.email, shop.name, lot.id);
+    notifyReceipt(owner.email, shop.full_name, lot.id);
     
     // If request is from fetch (scanner), return JSON; otherwise redirect
     if (req.headers.accept && req.headers.accept.includes('application/json')) {

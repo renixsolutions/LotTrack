@@ -25,7 +25,26 @@
             <tr>
               <td style="font-size: 0.8rem; font-weight: 700;">#ORD-<%= order.id %></td>
               <td><%= order.shop_name %></td>
-              <td style="font-size: 0.8rem; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= order.description %></td>
+               <td style="font-size: 0.8rem; max-width: 250px;">
+                  <div style="font-weight: 600; margin-bottom: 5px;"><%= order.description %></div>
+                  <% if (order.images) { %>
+                    <% 
+                        let imgList = []; 
+                        try { 
+                            imgList = JSON.parse(order.images); 
+                        } catch(e) { 
+                            imgList = [order.images]; 
+                        } 
+                    %>
+                    <div style="display: flex; gap: 4px;">
+                        <% imgList.forEach(img => { %>
+                            <a href="/uploads/<%= img %>" target="_blank">
+                                <img src="/uploads/<%= img %>" style="width: 32px; height: 32px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border);">
+                            </a>
+                        <% }); %>
+                    </div>
+                  <% } %>
+               </td>
               <td style="font-size: 0.8rem;"><%= new Date(order.created_at).toLocaleDateString() %></td>
               <td>
                 <% 
